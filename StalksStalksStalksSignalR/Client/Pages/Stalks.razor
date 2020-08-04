@@ -1,0 +1,355 @@
+﻿@page "/stalks"
+
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+@implements IDisposable
+@using StalksStalksStalksSignalR.Shared
+@using System.Text.Json;
+@using System.Web.Script.Serialization;
+@using Newtonsoft.Json;
+
+<h3>Stalks</h3>
+
+@if (!gameStarted)
+{
+    <p>Please enter your name!</p>
+    <p></p>
+    <EditForm Model=@currentPlayer OnSubmit=@ReadyUp>
+        <InputText @bind-Value="username" />
+        <input type="submit" value="Ready Up" class="btn btn-primary" />
+    </EditForm>
+    <p>List of connected users</p>
+    <button class="btn btn-primary" @onclick="GetUsers">Get Users</button>
+    @foreach (player player in playerList)
+    {
+        <p>@player.Name : @player.ConnectionId : @player.Ready.ToString()</p>
+    }
+
+    @if (allPlayersReady)
+    {
+        <button class="btn btn-primary" @onclick="Send">Start the mother loving game!!!</button>
+    }
+}
+else
+{
+    <!--
+    <p>List of connected users</p>
+    <button class="btn btn-primary" @onclick="GetUsers">Get Users</button>
+    @foreach (player player in playerList)
+    {
+        <p>@player.Name : @player.ConnectionId : @player.Ready.ToString()</p>
+    }
+
+    <p> Your username is: @username</p>
+    <p> Your connection id is: @playerConnectionId</p>
+    -->
+    if (endGame)
+    {
+        <h1>The winner is: @winningPlayer.Name</h1>
+        <p>You're the best at picking stalks! What a useful skill for society!!!</p>
+    }
+    else
+    {
+    <div>
+        <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> Who needs to press 'Start a new year!!!':
+        @foreach (player player in playerList)
+        {
+            @if (player.StartNewYear == false)
+            {
+                <b> || @player.Name || </b>
+            }
+        }
+    </div>
+    }
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Bear or Bull?</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@year</td>
+                <td>@bullBear</td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Stalk Name</th>
+                <th>Price Per Share</th>
+                <th>Dividend Per Share (bull)</th>
+                <th>Dividend Per Share (bear)</th>
+                <th>Yearly Change</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var stalk in stalkList)
+            {
+                <tr>
+                    <td>@stalk.Name</td>
+                    <td>@stalk.PricePerShare</td>
+                    <td>@stalk.BullDividend</td>
+                    <td>@stalk.BearDividend</td>
+                    <td>@stalk.YearlyChange</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    if (!endGame)
+    {
+    <p>Make a purchase?</p>
+    <EditForm Model=@playerBuy OnSubmit=@BuyStalks>
+        <InputSelect @bind-Value="playerBuy.BuyOrSell">
+            <option value="Buy">BUY BUY BUY</option>
+            <option value="Sell">SELL SELL SELL</option>
+        </InputSelect>
+        <InputSelect @bind-Value="playerBuy.StalkName">
+            @foreach (var stalk in stalkList)
+                {
+                <option value="@stalk.Name">@stalk.Name</option>}
+        </InputSelect>
+        <InputNumber @bind-Value="playerBuy.TotalStalks">0</InputNumber>
+        <input type="submit" value="Submit" class="btn btn-primary" />
+    </EditForm>
+    }
+    <h3>@username  's Stats</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>CashOnHand</th>
+                <th>NetWorth</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$@currentPlayer.CashOnHand</td>
+                <td>$@currentPlayer.NetWorth</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>stalks owned by @username</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Stalk Name</th>
+                <th>Number of Stalks</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var owned in stalksOwned)
+            {
+                @if (owned.TotalStalks > 0)
+                {
+                    <tr>
+
+                        <td>@owned.StalkName</td>
+                        <td>@owned.TotalStalks</td>
+
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+
+    <p>Scoreboard baby!</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Networth</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (player player in playerList)
+            {
+                <tr>
+                    <td>@player.Name</td>
+                    <td>$@player.NetWorth</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    if (!endGame)
+    {
+    <div>
+        <button class="btn btn-primary" @onclick="EndGame">End it all now?</button> When the game 'ends', one more year is played and then the winner is declared.
+        Who wants to end it all???:
+        <p>
+            @foreach (player player in playerList)
+            {
+                @if (player.EndGame == true)
+                {
+                    <b> || @player.Name || </b>
+                }
+            }
+        </p>
+    </div>
+    }
+
+}
+
+@code {
+    private HubConnection hubConnection;
+
+    public int year = 1;
+    public string bullBear = "It begins...";
+
+    public bool gameStarted = false;
+
+    public List<stalk> stalkList = new List<stalk>();
+
+    public string stalksListToJson;
+
+    public player currentPlayer = new player("It'sa me-a Mario", "", 10000, 0, false, false, false);
+    public string username = "";
+    public List<player> playerList = new List<player>();
+    public bool allPlayersReady = false;
+
+
+    public List<StalksOwned> stalksOwned = new List<StalksOwned>();
+    public List<StalksOwned> allStalksOwned = new List<StalksOwned>();
+
+    PlayerBuy playerBuy = new PlayerBuy("", 0, 0, "");
+
+    public string playerConnectionId;
+    public bool gotConnectionId = false;
+    public bool gotUserName = false;
+    public int playerCashOnHand = 1;
+    public int playerNetWorth = 1;
+    public bool startNewYear = false;
+    public bool endGame = false;
+    public string winner = "";
+    player winningPlayer = new player("It'sa me-a Mario", "", 10000, 0, false, false, false);
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/Game"))
+            .Build();
+
+        hubConnection.On<string>("Returned users", (usersToJson) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(usersToJson, playerList);
+            StateHasChanged();
+        });
+
+        hubConnection.On<string, bool, string>("Readied User", (playerListToJson, arePlayersReady, currentPlayerInfo) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            allPlayersReady = arePlayersReady;
+
+            if (!gotConnectionId && username != "")
+            {
+                currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerInfo, currentPlayer);
+                playerConnectionId = currentPlayer.ConnectionId;
+                gotConnectionId = true;
+            }
+
+            StateHasChanged();
+        });
+
+        hubConnection.On<bool, string, int, string, string, string>("Start Game", (isGameStarted, stalksListToJson, newYear, currentPlayerInfo, playerListToJson, StalksOwnedToJson) =>
+        {
+            gameStarted = isGameStarted;
+            year = newYear;
+            stalkList = JsonConvert.DeserializeAnonymousType(stalksListToJson, stalkList);
+            currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerInfo, currentPlayer);
+            if (!gotUserName && currentPlayer.ConnectionId == playerConnectionId)
+            {
+                username = currentPlayer.Name;
+                gotUserName = true;
+            }
+
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = playerList.First(x => x.ConnectionId == playerConnectionId);
+
+            StateHasChanged();
+
+        });
+
+        hubConnection.On<int, string, string, string, string>("New Year", (newYear, newBearBull, stalksListToJson, StalksOwnedToJson, playerListToJson) =>
+        {
+            year = newYear;
+            bullBear = newBearBull;
+            stalkList = JsonConvert.DeserializeAnonymousType(stalksListToJson, stalkList);
+
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = playerList.First(x => x.ConnectionId == playerConnectionId);
+
+            allStalksOwned = JsonConvert.DeserializeAnonymousType(StalksOwnedToJson, allStalksOwned);
+            stalksOwned = allStalksOwned.Where(x => x.PlayerName == playerConnectionId).ToList();
+
+            if (endGame)
+            {
+                winningPlayer = playerList.OrderByDescending(x => x.NetWorth).First();
+            }
+
+            StateHasChanged();
+        });
+
+        hubConnection.On<string, string>("Bought Stalks", (playerListToJson, StalksOwnedToJson) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = playerList.First(x => x.ConnectionId == playerConnectionId);
+
+            allStalksOwned = JsonConvert.DeserializeAnonymousType(StalksOwnedToJson, allStalksOwned);
+            stalksOwned = allStalksOwned.Where(x => x.PlayerName == playerConnectionId).ToList();
+
+            StateHasChanged();
+        });
+
+        hubConnection.On<string, bool>("Player Wants To Quit", (playerListToJson, EndTheGame) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = playerList.First(x => x.ConnectionId == playerConnectionId);
+
+            endGame = EndTheGame;
+            StateHasChanged();
+            if (EndTheGame)
+            {
+                NewYear();
+            }
+
+
+        });
+
+
+        await hubConnection.StartAsync();
+    }
+
+    public void StartNewYear()
+    {
+        //stalksListToJson = JsonConvert.SerializeObject(stalkList);
+        NewYear();
+    }
+
+    Task Send() =>
+        hubConnection.SendAsync("InitializeGame", gameStarted, username);
+    Task NewYear() =>
+        hubConnection.SendAsync("GetNewYear", bullBear);
+    Task BuyStalks() =>
+        hubConnection.SendAsync("BuyStalks", JsonConvert.SerializeObject(playerBuy));
+    Task GetUsers() =>
+        hubConnection.SendAsync("GetUsers");
+    Task ReadyUp() =>
+        hubConnection.SendAsync("ReadyUp", username);
+    Task EndGame() =>
+        hubConnection.SendAsync("Endgame");
+
+    public bool IsConnected =>
+hubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        _ = hubConnection.DisposeAsync();
+    }
+}
