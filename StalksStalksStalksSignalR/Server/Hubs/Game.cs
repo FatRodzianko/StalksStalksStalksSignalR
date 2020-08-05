@@ -248,8 +248,8 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                 year++;
                 bullBear = BullBear();
                 adjustStalks(bullBear);
-                CheckBankruptcy();
                 thisYear = GetYearEvent(bullBear);
+                CheckBankruptcy();
                 PayDividend(bullBear);
                 GetNetWorth();
                 foreach (player otherplayer in playerList)
