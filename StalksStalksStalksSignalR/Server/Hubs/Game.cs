@@ -31,7 +31,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             {
                 GameAlready = false;
                 EndTheGame = false;
-                year = 1;
+                year = 0;
             }
             return base.OnDisconnectedAsync(exception);
         }
@@ -44,9 +44,11 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         public static List<stalk> stalkList = new List<stalk>();
         public static List<player> playerList = new List<player>();
         public static List<StalksOwned> stalksOwned = new List<StalksOwned>();
+        public static List<BearEvent> BearEvents = new List<BearEvent>();
+        public static List<BullEvent> BullEvents = new List<BullEvent>();
         public PlayerBuy playerBuy = new PlayerBuy("", 0, 0, "");
         public static bool GameAlready = false;
-        public static int year = 1;
+        public static int year = 0;
         public bool EndTheGame = false;
 
         public async Task ReadyUp(string username)
@@ -111,10 +113,38 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                 stalksOwned.Clear();
             }
 
-            stalkList.Add(new stalk("strYker", 100, 0, 70, 80, 0, 0));
+            //add the stalks
+            stalkList.Add(new stalk("strYker", 100, 0, 65, 65, 0, 0));
             stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 10, 20, 5, 10));
             stalkList.Add(new stalk("BERRY BONDS FROM DIE HARD", 100, 0, 0, 0, 5, 5));
-            stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 85, 15, 0, 25));
+            stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 80, 25, 0, 25));
+            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 30, 25, 5, 10));
+            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 50, 40, 10, 15));
+            stalkList.Add(new stalk("PG&Enron", 100, 0, 25, 15, 0, 15));
+            stalkList.Add(new stalk("My Mutuals and Me Inc.", 100, 0, 35, 30, 10, 20));
+            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 45, 35, 20, 5));
+            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 30, 30, 15, 5));
+
+            //add the yearly events
+
+            BearEvents.Add(new BearEvent("strYker", "I've abandoned my child...I'VE ABANDONED MY CHILD. I'VE ABANDONED MY BOY!", -20));
+            BullEvents.Add(new BullEvent("strYker","I drink your milkshake. Sluuurrrrp! I drink it up!", 15));
+            BearEvents.Add(new BearEvent( "Soprano's HUD Scam", "\"Of all the girls in Jersey, you had to **** this one?\" Tony Soprano beats you with a belt.", -10));
+            BullEvents.Add(new BullEvent("Soprano's HUD Scam", "This Old House has a lot of copper pipes. Bada-bing!", 10));
+            BearEvents.Add(new BearEvent("Teamsters Pension Fund", "Pension fund now managed by Goldman Sachs & Co. and Northern Trust Global Advisors fiduciaries. no more corruption!", -15));
+            BullEvents.Add(new BullEvent("Teamsters Pension Fund", "Ah Marone another hotel in Las Vegas needs our help. We're getting in on the ground floor!", 10));
+            BearEvents.Add(new BearEvent("Springfield Nuclear Power", "Danke, sir, we're from Germany and here to make your power plant more efficient.", -25));
+            BullEvents.Add(new BullEvent("Springfield Nuclear Power", "Mr Urbns, time for your sponge bath!", 10));
+            BearEvents.Add(new BearEvent("North Haverbrook MONORAIL", "After an extensive three week training session, EHMOR ISPMOSN is now a monorail conductor!", -20));
+            BullEvents.Add(new BullEvent("North Haverbrook MONORAIL", "There's nothing on this Earth like genuine, bonafide, electrified, six car MONORAIL!", 20));
+            BearEvents.Add(new BearEvent("PG&Enron", "Ah crap we forgot about maintainence for the 50th year in a row!", -25));
+            BullEvents.Add(new BullEvent("PG&Enron", "Planned blackouts going just as planned. AHHNOLD is sure to win the presidency now!", 10));
+            BearEvents.Add(new BearEvent("My Mutuals and Me Inc.", "You're not my mutual...", -5));
+            BullEvents.Add(new BullEvent("My Mutuals and Me Inc.", "Hey, we're mutuals!", 10));
+            BearEvents.Add(new BearEvent("Unionized Submissives LLC", "If I could save the Union without ungagging any subs, I would do it!", -10));
+            BullEvents.Add(new BullEvent("Unionized Submissives LLC", "All the armies of Europe and Asia combined, could not by force, take a drink from our Golden Streams!", 15));
+            BearEvents.Add(new BearEvent("My Pillow, Your Pillow, We're All Pillows!", "My pillow, my pillow, what have ye done!", -5));
+            BullEvents.Add(new BullEvent("My Pillow, Your Pillow, We're All Pillows!", "Your pillow is looking mighty fine today!", 5));
 
             foreach (player player in playerList)
             {
@@ -170,11 +200,47 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             return BearBull;
         }
 
+        public YearEvent GetYearEvent(string bearOrBull)
+        {
+            YearEvent thisYear = new YearEvent("", "", "", 0);
+            var rng = new Random();
+
+            if (string.Equals(bearOrBull, "bear..."))
+            {
+                BearEvent newBearEvent = BearEvents[rng.Next(BearEvents.Count - 1)];
+                thisYear = new YearEvent("bear...", newBearEvent.StalkName, newBearEvent.Description, newBearEvent.PriceChange);
+
+                foreach (stalk stalk in stalkList)
+                {
+                    if (string.Equals(stalk.Name, thisYear.StalkName))
+                    {
+                        stalk.PricePerShare += thisYear.PriceChange;
+                    }
+                }
+            }
+            else
+            {
+                BullEvent newBullEvent = BullEvents[rng.Next(BullEvents.Count - 1)];
+                thisYear = new YearEvent("BULL BULL BULL", newBullEvent.StalkName, newBullEvent.Description, newBullEvent.PriceChange);
+
+                foreach (stalk stalk in stalkList)
+                {
+                    if (string.Equals(stalk.Name, thisYear.StalkName))
+                    {
+                        stalk.PricePerShare += thisYear.PriceChange;
+                    }
+                }
+            }
+
+            return thisYear;
+        }
+
         public async Task GetNewYear(string bullBear)
         {
             player player = playerList.First(x => x.ConnectionId == Context.ConnectionId);
             player.StartNewYear = true;
-            
+            YearEvent thisYear = new YearEvent("", "", "", 0);
+
             bool isEveryoneReady = CheckReadyYear();
             if (isEveryoneReady || EndTheGame)
             {
@@ -183,6 +249,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                 bullBear = BullBear();
                 adjustStalks(bullBear);
                 CheckBankruptcy();
+                thisYear = GetYearEvent(bullBear);
                 PayDividend(bullBear);
                 GetNetWorth();
                 foreach (player otherplayer in playerList)
@@ -193,7 +260,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
             }
 
-            await Clients.All.SendAsync("New Year", year, bullBear, JsonConvert.SerializeObject(stalkList), JsonConvert.SerializeObject(stalksOwned), JsonConvert.SerializeObject(playerList));
+            await Clients.All.SendAsync("New Year", year, bullBear, JsonConvert.SerializeObject(stalkList), JsonConvert.SerializeObject(stalksOwned), JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(thisYear));
         }
 
         public bool CanBuy(int numberOfStalks, int stalkPrice, player currentPlayer)
@@ -333,17 +400,22 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             {
                 foreach (stalk stalk in stalkList)
                 {
-                    stalk.YearlyChange = rng.Next((stalk.maxChangeBear * -1), 0);
-                    stalk.PricePerShare += stalk.YearlyChange;
-
+                    if (stalk.Name != "BERRY BONDS FROM DIE HARD")
+                    {
+                        stalk.YearlyChange = rng.Next((stalk.maxChangeBear * -1), 10);
+                        stalk.PricePerShare += stalk.YearlyChange;
+                    }
                 }
             }
             else
             {
                 foreach (stalk stalk in stalkList)
                 {
-                    stalk.YearlyChange = rng.Next(0, stalk.maxChangeBull);
-                    stalk.PricePerShare += stalk.YearlyChange;
+                    if (stalk.Name != "BERRY BONDS FROM DIE HARD")
+                    {
+                        stalk.YearlyChange = rng.Next(-15, stalk.maxChangeBull);
+                        stalk.PricePerShare += stalk.YearlyChange;
+                    }
                 }
             }
 
