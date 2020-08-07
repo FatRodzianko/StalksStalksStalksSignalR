@@ -183,10 +183,10 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
             //Bear Events
             BearEvents.Add(new BearEvent("strYker", "I've abandoned my child...I'VE ABANDONED MY CHILD. I'VE ABANDONED MY BOY!", -20));
-            BullEvents.Add(new BullEvent("strYker", "Coup in Venezuela failed. strYker's hand picked \"legitimate\" leader Otto Von Mengele gained zero popular support and was laughed out of the country.", -10));
-            BullEvents.Add(new BullEvent("strYker", "New regulations in the U.S. restrict dumping oil directly into rivers.", -15));
-            BullEvents.Add(new BullEvent("strYker", "Hired former Head of Safety and Quality Assurance from BP to design new offshore oilrigs.", -15));
-            BullEvents.Add(new BullEvent("strYker", "New policy enacted to allow oil tanker captains (1) cup of beer while on duty. All captains purchase gallon sized cup.", -10));
+            BearEvents.Add(new BullEvent("strYker", "Coup in Venezuela failed. strYker's hand picked \"legitimate\" leader Otto Von Mengele gained zero popular support and was laughed out of the country.", -10));
+            BearEvents.Add(new BullEvent("strYker", "New regulations in the U.S. restrict dumping oil directly into rivers.", -15));
+            BearEvents.Add(new BullEvent("strYker", "Hired former Head of Safety and Quality Assurance from BP to design new offshore oilrigs.", -15));
+            BearEvents.Add(new BullEvent("strYker", "New policy enacted to allow oil tanker captains (1) cup of beer while on duty. All captains purchase gallon sized cup.", -10));
 
             BearEvents.Add(new BearEvent("Soprano's HUD Scam", "\"Of all the girls in Jersey, you had to **** this one?\" Tony Soprano beats you with a belt.", -10));
             BearEvents.Add(new BearEvent("Soprano's HUD Scam", "City Council member gets cold feet. You're forced to give them cement shoes. Scam on hold until you can blackmail another council member to play ball.", -20));
