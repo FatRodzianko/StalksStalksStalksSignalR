@@ -114,16 +114,16 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             }
 
             //add the stalks
-            stalkList.Add(new stalk("strYker", 100, 0, 45, 40, 0, 0, false));
-            stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 15, 10, 10, 15, false));
+            stalkList.Add(new stalk("strYker", 100, 0, 50, 45, 0, 0, false));
+            stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 20, 15, 10, 15, false));
             stalkList.Add(new stalk("BERRY BONDS FROM DIE HARD", 100, 0, 0, 0, 5, 5, false));
             stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 40, 20, 10, 25, false));
-            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 15, 10, 5, 10, false));
-            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 25, 15, 10, 15, false));
+            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 20, 15, 5, 10, false));
+            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 30, 20, 10, 15, false));
             stalkList.Add(new stalk("PG&Enron", 100, 0, 35, 15, 0, 15, false));
             stalkList.Add(new stalk("My Mutuals and Me Inc.", 100, 0, 10, 5, 10, 20, false));
-            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 20, 15, 20, 5, false));
-            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 25, 15, 15, 10, false));
+            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 25, 20, 20, 5, false));
+            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 30, 20, 15, 10, false));
 
             //add the yearly events
             //Bull events
@@ -137,24 +137,24 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             BullEvents.Add(new BullEvent("Soprano's HUD Scam", "Great meeting in the Russian bathhouse. You weren't even the fattest one there!", 5));
             BullEvents.Add(new BullEvent("Soprano's HUD Scam", "City Council member shows up at your underground casino. You spike their drinks and loand them $50k. They lose it all.", 10));
             BullEvents.Add(new BullEvent("Soprano's HUD Scam", "After purchasing a block of dilapidated homes, Police Commissioner on the dole agrees to clear out the 'riffraff' living in the neighborhood.", 5));
-            BullEvents.Add(new BullEvent("Soprano's HUD Scam", "Head of the Urban League receives bill for daughter's college tuition. They agree to sign off on your scam.", 5));
+            BullEvents.Add(new BullEvent("Soprano's HUD Scam", "Head of the Urban League receives bill for daughter's college tuition. They agree to sign off on your scam.", 15));
 
             BullEvents.Add(new BullEvent("Teamsters Pension Fund", "Ah Marone another hotel in Las Vegas needs our help. We're getting in on the ground floor!", 10));
             BullEvents.Add(new BullEvent("Teamsters Pension Fund", "Bullets left on the doorsteps of union member dissidents day before leadership elections.", 5));
             BullEvents.Add(new BullEvent("Teamsters Pension Fund", "Construction of casino complete. No one will ever find what's beneath the foundation. Vegas, baby!", 10));
             BullEvents.Add(new BullEvent("Teamsters Pension Fund", "New union contract signed with FedEx. Nation wide strike ends!", 5));
-            BullEvents.Add(new BullEvent("Teamsters Pension Fund", "Worst performing employee quits to follow their dream of working at the bowling alley. We'll never see them again!", 5));
+            BullEvents.Add(new BullEvent("Teamsters Pension Fund", "An epidemic of goods falling off the back of trucks and right into the hands of our 'friends.'", 15));
 
             BullEvents.Add(new BullEvent("Springfield Nuclear Power", "Mr Urbns, time for your sponge bath!", 10));
-            BullEvents.Add(new BullEvent("Springfield Nuclear Power", "New union contract specifies donuts to be provided each morning to every employee. Productivity increases 10%", 10));
+            BullEvents.Add(new BullEvent("Springfield Nuclear Power", "New union contract specifies donuts to be provided each morning to every employee. Productivity increases 10%", 15));
             BullEvents.Add(new BullEvent("Springfield Nuclear Power", "Reactor meltdown avoided after employee presses random button on the control panel.", 5));
             BullEvents.Add(new BullEvent("Springfield Nuclear Power", "New chairs with added lumbar support provided to all control operators.", 5));
-            BullEvents.Add(new BullEvent("Springfield Nuclear Power", "Payroll error results in all employees $0.01 less per hour. No one notices or complains.", 5));
+            BullEvents.Add(new BullEvent("Springfield Nuclear Power", "Worst performing employee quits to follow their dream of working at the bowling alley. We'll never see them again!", 10));
 
             BullEvents.Add(new BullEvent("North Haverbrook MONORAIL", "There's nothing on this Earth like genuine, bonafide, electrified, six car MONORAIL!", 5));
-            BullEvents.Add(new BullEvent("North Haverbrook MONORAIL", "An anchor was conviently found on the runaway monorail train.", 5));
+            BullEvents.Add(new BullEvent("North Haverbrook MONORAIL", "An anchor was conviently found on the runaway monorail train.", 10));
             BullEvents.Add(new BullEvent("North Haverbrook MONORAIL", "The citizens of the town come to their good senses, cast away all doubts about the monorail project, and purchase the monorail.", 20));
-            BullEvents.Add(new BullEvent("North Haverbrook MONORAIL", "No one in this one horse town has heard of, let alone seen, The Music Man.", 5));
+            BullEvents.Add(new BullEvent("North Haverbrook MONORAIL", "No one in this one horse town has heard of, let alone seen, The Music Man.", 15));
             BullEvents.Add(new BullEvent("North Haverbrook MONORAIL", "Groundbreaking of the MONORAIL with William Shatner is broadcast on local news.", 10));
 
             BullEvents.Add(new BullEvent("PG&Enron", "Planned blackouts going just as planned. AHHNOLD is sure to win the presidency now!", 10));
@@ -171,11 +171,11 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
             BullEvents.Add(new BullEvent("Unionized Submissives LLC", "All the armies of Europe and Asia combined, could not by force, take a drink from our Golden Streams!", 15));
             BullEvents.Add(new BullEvent("Unionized Submissives LLC", "All the armies of Europe and Asia combined, could not by force, take a drink from our Golden Streams!", 10));
-            BullEvents.Add(new BullEvent("Unionized Submissives LLC", "All the armies of Europe and Asia combined, could not by force, take a drink from our Golden Streams!", 5));
+            BullEvents.Add(new BullEvent("Unionized Submissives LLC", "All the armies of Europe and Asia combined, could not by force, take a drink from our Golden Streams!", 15));
             BullEvents.Add(new BullEvent("Unionized Submissives LLC", "All the armies of Europe and Asia combined, could not by force, take a drink from our Golden Streams!", 5));
             BullEvents.Add(new BullEvent("Unionized Submissives LLC", "All the armies of Europe and Asia combined, could not by force, take a drink from our Golden Streams!", 5));
             
-            BullEvents.Add(new BullEvent("My Pillow, Your Pillow, We're All Pillows!", "'My Pillow, Your Pillow, We're All Pillows!', the last manufacturer left in the U.S., moves factories to Laos to save on labor costs.", 5));
+            BullEvents.Add(new BullEvent("My Pillow, Your Pillow, We're All Pillows!", "'My Pillow, Your Pillow, We're All Pillows!', the last manufacturer left in the U.S., moves factories to Laos to save on labor costs.", 15));
             BullEvents.Add(new BullEvent("My Pillow, Your Pillow, We're All Pillows!", "New cost saving pillow filling discovered.", 5));
             BullEvents.Add(new BullEvent("My Pillow, Your Pillow, We're All Pillows!", "Following the pandemic cruiselines replace all former pillows with 'My Pillow, Your Pillow, We're All Pillows' after experiments show no living thing can survive more than five minutes on the pillow's surface.", 10));
             BullEvents.Add(new BullEvent("My Pillow, Your Pillow, We're All Pillows!", "Recovering meth addict and best friend of the founder and owner plants head lice on the pillows in every Motel 6 across the country.", 10));
@@ -185,8 +185,8 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             BearEvents.Add(new BearEvent("strYker", "I've abandoned my child...I'VE ABANDONED MY CHILD. I'VE ABANDONED MY BOY!", -20));
             BearEvents.Add(new BearEvent("strYker", "Coup in Venezuela failed. strYker's hand picked \"legitimate\" leader Otto Von Mengele gained zero popular support and was laughed out of the country.", -10));
             BearEvents.Add(new BearEvent("strYker", "New regulations in the U.S. restrict dumping oil directly into rivers.", -15));
-            BearEvents.Add(new BearEvent("strYker", "Hired former Head of Safety and Quality Assurance from BP to design new offshore oilrigs.", -15));
-            BearEvents.Add(new BearEvent("strYker", "New policy enacted to allow oil tanker captains (1) cup of beer while on duty. All captains purchase gallon sized cup.", -10));
+            BearEvents.Add(new BearEvent("strYker", "Hired former Head of Safety and Quality Assurance from BP to design new offshore oilrigs.", -25));
+            BearEvents.Add(new BearEvent("strYker", "New policy enacted to allow oil tanker captains (1) cup of beer while on duty. All captains purchase gallon sized cup.", -15));
 
             BearEvents.Add(new BearEvent("Soprano's HUD Scam", "\"Of all the girls in Jersey, you had to **** this one?\" Tony Soprano beats you with a belt.", -10));
             BearEvents.Add(new BearEvent("Soprano's HUD Scam", "City Council member gets cold feet. You're forced to give them cement shoes. Scam on hold until you can blackmail another council member to play ball.", -20));
@@ -198,21 +198,21 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             BearEvents.Add(new BearEvent("Teamsters Pension Fund", "Motor Carrier Act passes congress.", -20));
             BearEvents.Add(new BearEvent("Teamsters Pension Fund", "No one can find Jimmy.", -15));
             BearEvents.Add(new BearEvent("Teamsters Pension Fund", "Strike broken. The 'man' won. Driver pay cut by 20%.", -15));
-            BearEvents.Add(new BearEvent("Teamsters Pension Fund", "Vegas casinos convinced themselves that adding theme parks to their hotels will finally allow them to take money directly from children. All parks shuttered in early 2000's.", -10));
+            BearEvents.Add(new BearEvent("Teamsters Pension Fund", "Vegas casinos convinced themselves that adding theme parks to their hotels will finally allow them to take money directly from children. All parks shuttered in early 2000's.", -15));
 
             BearEvents.Add(new BearEvent("Springfield Nuclear Power", "Danke, sir, we're from Germany and here to make your power plant more efficient.", -5));
             BearEvents.Add(new BearEvent("Springfield Nuclear Power", "Three-eyed fish found in river downstream from the plant.", -10));
-            BearEvents.Add(new BearEvent("Springfield Nuclear Power", "New, cheaper vending machines installed in the break room. Items get stuck in the machine more frequently compared to the older machines. Producivity plummets as an increasing number of employees get their arms stuck in the vending machines.", -5));
+            BearEvents.Add(new BearEvent("Springfield Nuclear Power", "New, cheaper vending machines installed in the break room. Items get stuck in the machine more frequently compared to the older machines. Producivity plummets as an increasing number of employees get their arms stuck in the vending machines.", -15));
             BearEvents.Add(new BearEvent("Springfield Nuclear Power", "Your long lost, cherished childhood toy ObOb is found by an employee's child. You reluctantly agree to pay the family to feel something for the first time in a decade.", -5));
             BearEvents.Add(new BearEvent("Springfield Nuclear Power", "Department of Energy Inspectors arrive at the plant.", -10));
 
-            BearEvents.Add(new BearEvent("North Haverbrook MONORAIL", "At the townhall, a busybody citizen asks pointed questions about the details of the monorail project.", -5));
+            BearEvents.Add(new BearEvent("North Haverbrook MONORAIL", "At the townhall, a busybody citizen asks pointed questions about the details of the monorail project.", -10));
             BearEvents.Add(new BearEvent("North Haverbrook MONORAIL", "An intrepid citizen visits neighboring town to see the results of their monorail project.", -15));
             BearEvents.Add(new BearEvent("North Haverbrook MONORAIL", "Townsfolk confused by the 'MONO = ONE RAIL = RAIL' presentation slide.", -5));
             BearEvents.Add(new BearEvent("North Haverbrook MONORAIL", "Monorail train cars installed with no brakes.", -10));
             BearEvents.Add(new BearEvent("North Haverbrook MONORAIL", "Designer of the monorail train cars blows the whistle on shoddy contruction and cheap materials used to build the North Haverbrook MONORAIL.", -10));
 
-            BearEvents.Add(new BearEvent("PG&Enron", "Ah crap we forgot about maintainence for the 50th year in a row!", -5));
+            BearEvents.Add(new BearEvent("PG&Enron", "Ah crap we forgot about maintainence for the 50th year in a row!", -15));
             BearEvents.Add(new BearEvent("PG&Enron", "Former lead signer of the Dead Kennedys siezes the state capitol and nationalizes the power grid.", -20));
             BearEvents.Add(new BearEvent("PG&Enron", "Accounts Payable fat fingered the bank account number for the new auditor. Our books are inspected for the first time in 20 years.", -20));
             BearEvents.Add(new BearEvent("PG&Enron", "Earthquake on the San Andreas fault sends half the coastline, and 90% of our customer base, into the Pacific Ocean.", -15));
@@ -232,8 +232,8 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
             BearEvents.Add(new BearEvent("My Pillow, Your Pillow, We're All Pillows!", "My pillow, my pillow, what have ye done!", -5));
             BearEvents.Add(new BearEvent("My Pillow, Your Pillow, We're All Pillows!", "Founder and owner convinced by current US president that they should run for Senate.", -10));
-            BearEvents.Add(new BearEvent("My Pillow, Your Pillow, We're All Pillows!", "Class action lawsuit after its discovered that new cost saving pillow fillings combust with greater intensitiy than gasoline.", -5));
-            BearEvents.Add(new BearEvent("My Pillow, Your Pillow, We're All Pillows!", "Small manufacturing defect results in hundreds of infants becoming swallowed and trapped within 'My Pillow, Your Pillow, We're All Pillows!'", -5));
+            BearEvents.Add(new BearEvent("My Pillow, Your Pillow, We're All Pillows!", "Class action lawsuit after its discovered that new cost saving pillow fillings combust with greater intensitiy than gasoline.", -15));
+            BearEvents.Add(new BearEvent("My Pillow, Your Pillow, We're All Pillows!", "Small manufacturing defect results in hundreds of infants becoming swallowed and trapped within 'My Pillow, Your Pillow, We're All Pillows!'", -15));
             BearEvents.Add(new BearEvent("My Pillow, Your Pillow, We're All Pillows!", "Factory in Laos forgot to install suicide nets outside the windows of the worker dormitories.", -5));
 
 
