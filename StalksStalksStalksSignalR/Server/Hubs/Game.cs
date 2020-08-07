@@ -51,6 +51,18 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         public static int year = 0;
         public bool EndTheGame = false;
 
+        public async Task RequestYeehaw()
+        {
+            player currentPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
+            await Clients.All.SendAsync("Yeehaw Requested", currentPlayer.Name);
+        }
+
+        public async Task GiveYeehaw()
+        {
+            player currentPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
+            await Clients.All.SendAsync("Yeehaw Sent", currentPlayer.Name);
+        }
+
         public async Task ReadyUp(string username)
         {
             CreatePlayer(username, Context.ConnectionId);

@@ -50,26 +50,27 @@ else
     }
     else
     {
-    <div>
-        <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> Who needs to press 'Start a new year!!!':
-        @foreach (player player in playerList)
-        {
-            @if (player.StartNewYear == false)
+        <div>
+            <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> Who needs to press 'Start a new year!!!':
+            @foreach (player player in playerList)
             {
-                <b> || @player.Name || </b>
+                @if (player.StartNewYear == false)
+                {
+                    <b> || @player.Name || </b>
+                }
             }
-        }
-    </div>
+        </div>
     }
 
     <p>Special events!!!</p>
     @thisYear.Description
     if (year > 0)
     {
-       <b> @thisYear.StalkName </b> <i> changed </i> <b> @thisYear.PriceChange</b>
+        <b> @thisYear.StalkName </b> <i> changed </i> <b> @thisYear.PriceChange</b>
     }
-    else { 
-<p><i>Good luck!</i></p>
+    else
+    {
+        <p><i>Good luck!</i></p>
     }
     <table class="table">
         <thead>
@@ -104,11 +105,13 @@ else
                     <td>@stalk.PricePerShare</td>
                     <td>@stalk.BullDividend</td>
                     <td>@stalk.BearDividend</td>
-                    <td>@stalk.YearlyChange
-                    @if (stalk.Split)
-                    { 
-                        <b> Split!!!</b>
-                    }</td>
+                    <td>
+                        @stalk.YearlyChange
+                        @if (stalk.Split)
+                        {
+                            <b> Split!!!</b>
+                        }
+                    </td>
                 </tr>
             }
 
@@ -116,20 +119,20 @@ else
     </table>
     if (!endGame && year > 0)
     {
-    <p>Make a purchase?</p>
-    <EditForm Model=@playerBuy OnSubmit=@BuyStalks>
-        <InputSelect @bind-Value="playerBuy.BuyOrSell">
-            <option value="Buy">BUY BUY BUY</option>
-            <option value="Sell">SELL SELL SELL</option>
-        </InputSelect>
-        <InputSelect @bind-Value="playerBuy.StalkName">
-            @foreach (var stalk in stalkList)
-                {
-                <option value="@stalk.Name">@stalk.Name</option>}
-        </InputSelect>
-        <InputNumber @bind-Value="playerBuy.TotalStalks">0</InputNumber>
-        <input type="submit" value="Submit" class="btn btn-primary" />
-    </EditForm>
+        <p>Make a purchase?</p>
+        <EditForm Model=@playerBuy OnSubmit=@BuyStalks>
+            <InputSelect @bind-Value="playerBuy.BuyOrSell">
+                <option value="Buy">BUY BUY BUY</option>
+                <option value="Sell">SELL SELL SELL</option>
+            </InputSelect>
+            <InputSelect @bind-Value="playerBuy.StalkName">
+                @foreach (var stalk in stalkList)
+                        {
+                    <option value="@stalk.Name">@stalk.Name</option>}
+            </InputSelect>
+            <InputNumber @bind-Value="playerBuy.TotalStalks">0</InputNumber>
+            <input type="submit" value="Submit" class="btn btn-primary" />
+        </EditForm>
     }
     <h3>@username  's Stats</h3>
     <table class="table">
@@ -191,26 +194,45 @@ else
 
         </tbody>
     </table>
+
+    @if (!CanIGetAYeehaw)
+    {
+        <button class="btn btn-primary" @onclick=@RequestYeehaw>Can I get a yeehaw?</button>
+    }
+    @if (CanIGetAYeehaw)
+    {
+        <button class="btn btn-primary" @onclick=@GiveYeehaw>Give @requestingYeehaw a Yeehaw!</button>
+        <p><b>@requestingYeehaw</b> is requesting a Yeehaw!</p>        
+    }
+    @if (YeehawReceived)
+    {
+        <p><b>@givingYeehaw</b> sent a Yeehaw!</p>
+        <audio autoplay><source src="/yeehaw.mp3" /></audio>
+    }
+
+
     if (!endGame)
     {
-    <div>
-        <button class="btn btn-primary" @onclick="EndGame">End it all now?</button> When the game 'ends', one more year is played and then the winner is declared.
-        Who wants to end it all???:
-        <p>
-            @foreach (player player in playerList)
-            {
-                @if (player.EndGame == true)
+        <div>
+            <button class="btn btn-primary" @onclick="EndGame">End it all now?</button> When the game 'ends', one more year is played and then the winner is declared.
+            Who wants to end it all???:
+            <p>
+                @foreach (player player in playerList)
                 {
-                    <b> || @player.Name || </b>
+                    @if (player.EndGame == true)
+                    {
+                        <b> || @player.Name || </b>
+                    }
                 }
-            }
-        </p>
-    </div>
+            </p>
+        </div>
     }
 
 }
 
 @code {
+    public bool hidden = true;
+
     private HubConnection hubConnection;
 
     public int year = 0;
@@ -243,8 +265,12 @@ else
     public string winner = "";
     player winningPlayer = new player("It'sa me-a Mario", "", 10000, 0, false, false, false);
 
-    YearEvent thisYear = new YearEvent("","","Welcome to StalksStalksStalks! You have been tasked with making MegaCorp as much money as possible! Don't worry, other people are competing with you as well! The investor with the highest networth wins! Everyone else is fired! Start the new year to begin the game!", 0);
+    YearEvent thisYear = new YearEvent("", "", "Welcome to StalksStalksStalks! You have been tasked with making MegaCorp as much money as possible! Don't worry, other people are competing with you as well! The investor with the highest networth wins! Everyone else is fired! Start the new year to begin the game!", 0);
 
+    public bool CanIGetAYeehaw = false;
+    public string requestingYeehaw = "";
+    public string givingYeehaw = "";
+    public bool YeehawReceived = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -348,6 +374,28 @@ else
 
         });
 
+        hubConnection.On<string>("Yeehaw Requested", (requestedName) =>
+        {
+            CanIGetAYeehaw = true;
+            YeehawReceived = false;
+            requestingYeehaw = requestedName;
+            StateHasChanged();
+
+        });
+
+        hubConnection.On<string>("Yeehaw Sent", (sentName) =>
+        {
+            CanIGetAYeehaw = false;
+            givingYeehaw = sentName;
+
+            if (givingYeehaw != requestingYeehaw)
+            {
+                YeehawReceived = true;
+            }
+            StateHasChanged();
+
+        });
+
 
         await hubConnection.StartAsync();
     }
@@ -370,6 +418,10 @@ else
         hubConnection.SendAsync("ReadyUp", username);
     Task EndGame() =>
         hubConnection.SendAsync("Endgame");
+    Task RequestYeehaw() =>
+        hubConnection.SendAsync("RequestYeehaw");
+    Task GiveYeehaw() =>
+        hubConnection.SendAsync("GiveYeehaw");
 
     public bool IsConnected =>
 hubConnection.State == HubConnectionState.Connected;
