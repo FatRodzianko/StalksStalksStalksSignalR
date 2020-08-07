@@ -80,7 +80,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         }
         public bool CheckEndGame()
         {
-            if (playerList.Any(x => x.EndGame == false))
+            if (playerList.Any(x => x.EndGame == false && x.Ready != false))
             {
                 return false;
             }
@@ -89,7 +89,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
         public bool CheckReadyYear()
         {
-            if (playerList.Any(x => x.StartNewYear == false))
+            if (playerList.Any(x => x.StartNewYear == false && x.Ready != false))
             {
                 return false;
             }
