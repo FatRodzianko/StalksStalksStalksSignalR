@@ -127,15 +127,15 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
             //add the stalks
             stalkList.Add(new stalk("strYker", 100, 0, 50, 45, 0, 0, false));
-            stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 20, 15, 10, 15, false));
+            stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 20, 15, 10, 10, false));
             stalkList.Add(new stalk("BERRY BONDS FROM DIE HARD", 100, 0, 0, 0, 5, 5, false));
-            stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 40, 20, 10, 25, false));
-            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 20, 15, 5, 10, false));
-            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 30, 20, 10, 15, false));
+            stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 40, 15, 0, 20, false));
+            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 20, 15, 0, 10, false));
+            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 30, 20, 15, 10, false));
             stalkList.Add(new stalk("PG&Enron", 100, 0, 35, 15, 0, 15, false));
-            stalkList.Add(new stalk("My Mutuals and Me Inc.", 100, 0, 10, 5, 10, 20, false));
-            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 25, 20, 20, 5, false));
-            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 30, 20, 15, 10, false));
+            stalkList.Add(new stalk("My Mutuals and Me Inc.", 100, 0, 10, 5, 5, 10, false));
+            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 25, 20, 0, 15, false));
+            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 25, 15, 5, 5, false));
 
             //add the yearly events
             //Bull events
@@ -510,9 +510,9 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
                         // Adding random chance that the stalk can increase by as much as 10 in a bear year
                         int randomChance = rng.Next(0, 10);
-                        if (randomChance > 7)
+                        if (randomChance > 8)
                         {
-                            stalk.YearlyChange += 10;
+                            stalk.YearlyChange += 5;
                         }
                         stalk.PricePerShare += stalk.YearlyChange;
                     }
@@ -528,9 +528,9 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
                         // Adding random chance that the stalk can DECREASE by as much as 10 in a bull year
                         int randomChance = rng.Next(0, 10);
-                        if (randomChance > 7)
+                        if (randomChance > 8)
                         {
-                            stalk.YearlyChange -= 10;
+                            stalk.YearlyChange -= 5;
                         }
                         stalk.PricePerShare += stalk.YearlyChange;
                     }
