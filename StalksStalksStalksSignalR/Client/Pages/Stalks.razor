@@ -104,7 +104,11 @@ else
                     <td>@stalk.PricePerShare</td>
                     <td>@stalk.BullDividend</td>
                     <td>@stalk.BearDividend</td>
-                    <td>@stalk.YearlyChange</td>
+                    <td>@stalk.YearlyChange
+                    @if (stalk.Split)
+                    { 
+                        <b> Split!!!</b>
+                    }</td>
                 </tr>
             }
 
