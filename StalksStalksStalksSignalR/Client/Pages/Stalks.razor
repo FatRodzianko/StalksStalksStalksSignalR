@@ -43,6 +43,20 @@ else
     <p> Your username is: @username</p>
     <p> Your connection id is: @playerConnectionId</p>
     -->
+    @if (!CanIGetAYeehaw)
+    {
+        <button class="btn btn-primary" @onclick=@RequestYeehaw>Can I get a yeehaw?</button>
+    }
+    @if (CanIGetAYeehaw)
+    {
+        <button class="btn btn-primary" @onclick=@GiveYeehaw>Give @requestingYeehaw a Yeehaw!</button>
+        <p><b>@requestingYeehaw</b> is requesting a Yeehaw!</p>
+    }
+    @if (YeehawReceived)
+    {
+        <p><b>@givingYeehaw</b> sent a Yeehaw!</p>
+        <audio autoplay><source src="/yeehaw.mp3" /></audio>
+    }
     if (endGame)
     {
         <h1>The winner is: @winningPlayer.Name</h1>
@@ -188,30 +202,15 @@ else
             {
                 if (player.Ready != false)
                 {
-                <tr>
-                    <td>@player.Name</td>
-                    <td>$@player.NetWorth</td>
-                </tr>
+                    <tr>
+                        <td>@player.Name</td>
+                        <td>$@player.NetWorth</td>
+                    </tr>
                 }
             }
 
         </tbody>
     </table>
-
-    @if (!CanIGetAYeehaw)
-    {
-        <button class="btn btn-primary" @onclick=@RequestYeehaw>Can I get a yeehaw?</button>
-    }
-    @if (CanIGetAYeehaw)
-    {
-        <button class="btn btn-primary" @onclick=@GiveYeehaw>Give @requestingYeehaw a Yeehaw!</button>
-        <p><b>@requestingYeehaw</b> is requesting a Yeehaw!</p>        
-    }
-    @if (YeehawReceived)
-    {
-        <p><b>@givingYeehaw</b> sent a Yeehaw!</p>
-        <audio autoplay><source src="/yeehaw.mp3" /></audio>
-    }
 
 
     if (!endGame)

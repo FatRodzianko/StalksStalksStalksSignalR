@@ -127,15 +127,15 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
             //add the stalks
             stalkList.Add(new stalk("strYker", 100, 0, 50, 45, 0, 0, false));
-            stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 25, 15, 10, 5, false));
-            stalkList.Add(new stalk("BERRY BONDS FROM DIE HARD", 100, 0, 0, 0, 5, 5, false));
-            stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 40, 15, 0, 20, false));
-            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 20, 15, 0, 10, false));
-            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 30, 20, 15, 10, false));
-            stalkList.Add(new stalk("PG&Enron", 100, 0, 35, 15, 0, 15, false));
-            stalkList.Add(new stalk("My Mutuals and Me Inc.", 100, 0, 10, 5, 5, 10, false));
-            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 25, 20, 0, 10, false));
-            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 25, 15, 5, 5, false));
+            stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 25, 15, 1, 3, false));
+            stalkList.Add(new stalk("BERRY BONDS FROM DIE HARD", 100, 0, 0, 0, 3, 3, false));
+            stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 40, 15, 0, 8, false));
+            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 20, 15, 0, 5, false));
+            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 30, 20, 2, 4, false));
+            stalkList.Add(new stalk("PG&Enron", 100, 0, 35, 15, 0, 4, false));
+            stalkList.Add(new stalk("My Mutuals and Me Inc.", 100, 0, 10, 5, 2, 3, false));
+            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 25, 20, 0, 2, false));
+            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 25, 15, 1, 2, false));
 
             //add the yearly events
             //Bull events
@@ -268,7 +268,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         }
         private static readonly string[] BearOrBull = new[]
         {
-            "bear...", "BULL BULL BULL"
+            "bear...", "bear...","bear...","bear...","bear...","BULL BULL BULL","BULL BULL BULL","BULL BULL BULL","BULL BULL BULL","BULL BULL BULL","BULL BULL BULL","BULL BULL BULL"
         };
 
         public void CreatePlayer(string playerName, string connectionid)
@@ -491,7 +491,10 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                 if (stalkList[i].PricePerShare <= 0)
                 {
                     stalksOwned.RemoveAll(x => x.StalkName == stalkList[i].Name);
+                    BearEvents.RemoveAll(x => x.StalkName == stalkList[i].Name);
+                    BullEvents.RemoveAll(x => x.StalkName == stalkList[i].Name);
                     stalkList.RemoveAt(i);
+                    
                 }
             }
         }
