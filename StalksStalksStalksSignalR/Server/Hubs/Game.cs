@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using StalksStalksStalksSignalR.Shared;
 using Microsoft.AspNetCore.Builder;
 using StalksStalksStalksSignalR.Client.Pages;
+using System.Security.Cryptography.X509Certificates;
 
 namespace StalksStalksStalksSignalR.Server.Hubs
 {
@@ -44,6 +45,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         public static List<stalk> stalkList = new List<stalk>();
         public static List<player> playerList = new List<player>();
         public static List<StalksOwned> stalksOwned = new List<StalksOwned>();
+        public static List<string> stalksBankrupt = new List<string>();
         public static List<BearEvent> BearEvents = new List<BearEvent>();
         public static List<BullEvent> BullEvents = new List<BullEvent>();
         public PlayerBuy playerBuy = new PlayerBuy("", 0, 0, "");
@@ -126,16 +128,16 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             }
 
             //add the stalks
-            stalkList.Add(new stalk("strYker", 100, 0, 50, 45, 0, 0, false));
-            stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 25, 15, 1, 3, false));
-            stalkList.Add(new stalk("BERRY BONDS FROM DIE HARD", 100, 0, 0, 0, 3, 3, false));
-            stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 40, 15, 0, 8, false));
-            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 20, 15, 0, 5, false));
-            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 30, 20, 2, 4, false));
-            stalkList.Add(new stalk("PG&Enron", 100, 0, 35, 15, 0, 4, false));
-            stalkList.Add(new stalk("My Mutuals and Me Inc.", 100, 0, 10, 5, 2, 3, false));
-            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 25, 20, 0, 2, false));
-            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 25, 15, 1, 2, false));
+            stalkList.Add(new stalk("strYker", 100, 0, 10, 50, 15, 45, 0, 0, false));
+            stalkList.Add(new stalk("Soprano's HUD Scam", 100, 0, 5, 25, 5, 15, 1, 3, false));
+            stalkList.Add(new stalk("BERRY BONDS FROM DIE HARD", 100, 0, 0, 0, 0, 0, 3, 3, false));
+            stalkList.Add(new stalk("Teamsters Pension Fund", 100, 0, 15, 40, 0, 15, 0, 8, false));
+            stalkList.Add(new stalk("Springfield Nuclear Power",100, 0, 10, 20, 0, 15, 0, 5, false));
+            stalkList.Add(new stalk("North Haverbrook MONORAIL", 100, 0, 5, 30, 0, 20, 1, 4, false));
+            stalkList.Add(new stalk("PG&Enron", 100, 0, 10, 35, 5, 15, 0, 4, false));
+            stalkList.Add(new stalk("My Mutuals and Me Inc.", 100, 0, 0, 10, 0, 5, 2, 3, false));
+            stalkList.Add(new stalk("Unionized Submissives LLC", 100, 0, 0, 25, 5, 20, 0, 2, false));
+            stalkList.Add(new stalk("My Pillow, Your Pillow, We're All Pillows!", 100, 0, 5, 25, 0, 15, 1, 1, false));
 
             //add the yearly events
             //Bull events
@@ -364,7 +366,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
             }
 
-            await Clients.All.SendAsync("New Year", year, bullBear, JsonConvert.SerializeObject(stalkList), JsonConvert.SerializeObject(stalksOwned), JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(thisYear));
+            await Clients.All.SendAsync("New Year", year, bullBear, JsonConvert.SerializeObject(stalkList), JsonConvert.SerializeObject(stalksOwned), JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(thisYear), JsonConvert.SerializeObject(stalksBankrupt));
         }
 
         public bool CanBuy(int numberOfStalks, int stalkPrice, player currentPlayer)
@@ -486,6 +488,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         }
         void CheckBankruptcy()
         {
+            stalksBankrupt.Clear();
             for (int i = stalkList.Count - 1; i >= 0; i--)
             {
                 if (stalkList[i].PricePerShare <= 0)
@@ -493,6 +496,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                     stalksOwned.RemoveAll(x => x.StalkName == stalkList[i].Name);
                     BearEvents.RemoveAll(x => x.StalkName == stalkList[i].Name);
                     BullEvents.RemoveAll(x => x.StalkName == stalkList[i].Name);
+                    stalksBankrupt.Add(stalkList[i].Name);
                     stalkList.RemoveAt(i);
                     
                 }
@@ -507,36 +511,38 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             {
                 foreach (stalk stalk in stalkList)
                 {
+                    stalk.YearlyChange = rng.Next((stalk.maxChangeBear * -1), (stalk.minChangeBear * -1));
                     if (stalk.Name != "BERRY BONDS FROM DIE HARD")
                     {
-                        stalk.YearlyChange = rng.Next((stalk.maxChangeBear * -1), 0);                        
-
-                        // Adding random chance that the stalk can increase by as much as 10 in a bear year
+                        // Adding random chance that the stalk can DECREASE by as much as 10 in a bull year
                         int randomChance = rng.Next(0, 10);
                         if (randomChance > 8)
                         {
                             stalk.YearlyChange += 5;
                         }
-                        stalk.PricePerShare += stalk.YearlyChange;
+
                     }
+                    stalk.PricePerShare += stalk.YearlyChange;
+
                 }
             }
             else
             {
                 foreach (stalk stalk in stalkList)
                 {
+                    stalk.YearlyChange = rng.Next(stalk.minChangeBull, stalk.maxChangeBull);
+
                     if (stalk.Name != "BERRY BONDS FROM DIE HARD")
                     {
-                        stalk.YearlyChange = rng.Next(0, stalk.maxChangeBull);
-
                         // Adding random chance that the stalk can DECREASE by as much as 10 in a bull year
                         int randomChance = rng.Next(0, 10);
                         if (randomChance > 8)
                         {
                             stalk.YearlyChange -= 5;
                         }
-                        stalk.PricePerShare += stalk.YearlyChange;
+                        
                     }
+                    stalk.PricePerShare += stalk.YearlyChange;
                 }
             }
 
