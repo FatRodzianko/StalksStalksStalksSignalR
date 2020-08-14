@@ -45,7 +45,9 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         public static List<stalk> stalkList = new List<stalk>();
         public static List<player> playerList = new List<player>();
         public static List<StalksOwned> stalksOwned = new List<StalksOwned>();
+        
         public static List<string> stalksBankrupt = new List<string>();
+        
         public static List<BearEvent> BearEvents = new List<BearEvent>();
         public static List<BullEvent> BullEvents = new List<BullEvent>();
         public PlayerBuy playerBuy = new PlayerBuy("", 0, 0, "");
@@ -327,7 +329,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             {
                 BullEvent newBullEvent = BullEvents[rng.Next(BullEvents.Count - 1)];
                 thisYear = new YearEvent("BULL BULL BULL", newBullEvent.StalkName, newBullEvent.Description, newBullEvent.PriceChange);
-
+                
                 foreach (stalk stalk in stalkList)
                 {
                     if (string.Equals(stalk.Name, thisYear.StalkName))
@@ -341,7 +343,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         }
 
         public async Task GetNewYear(string bullBear)
-        {
+        {                        
             player player = playerList.First(x => x.ConnectionId == Context.ConnectionId);
             player.StartNewYear = true;
             YearEvent thisYear = new YearEvent("", "", "", 0);
@@ -493,6 +495,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             {
                 if (stalkList[i].PricePerShare <= 0)
                 {
+
                     stalksOwned.RemoveAll(x => x.StalkName == stalkList[i].Name);
                     BearEvents.RemoveAll(x => x.StalkName == stalkList[i].Name);
                     BullEvents.RemoveAll(x => x.StalkName == stalkList[i].Name);
@@ -518,7 +521,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                         int randomChance = rng.Next(0, 10);
                         if (randomChance > 8)
                         {
-                            stalk.YearlyChange += 5;
+                            stalk.YearlyChange = rng.Next(0, 6);
                         }
 
                     }
@@ -538,7 +541,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                         int randomChance = rng.Next(0, 10);
                         if (randomChance > 8)
                         {
-                            stalk.YearlyChange -= 5;
+                            stalk.YearlyChange = rng.Next(-10,1);
                         }
                         
                     }

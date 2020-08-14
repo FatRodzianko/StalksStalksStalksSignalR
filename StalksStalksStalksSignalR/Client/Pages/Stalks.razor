@@ -43,28 +43,39 @@ else
     <p> Your username is: @username</p>
     <p> Your connection id is: @playerConnectionId</p>
     -->
-    @if (!CanIGetAYeehaw)
-    {
-        <button class="btn btn-primary" @onclick=@RequestYeehaw>Can I get a yeehaw?</button>
-    }
-    @if (CanIGetAYeehaw)
-    {
-        <button class="btn btn-primary" @onclick=@GiveYeehaw>Give @requestingYeehaw a Yeehaw!</button>
-        <p><b>@requestingYeehaw</b> is requesting a Yeehaw!</p>
-    }
-    @if (YeehawReceived)
-    {
-        <p><b>@givingYeehaw</b> sent a Yeehaw!</p>
-        <audio autoplay><source src="/yeehaw.mp3" /></audio>
-    }
+    <div style="float:left;">
+        @if (!CanIGetAYeehaw)
+        {
+            <button class="btn btn-primary" @onclick=@RequestYeehaw>Can I get a yeehaw?</button>
+        }
+        @if (CanIGetAYeehaw)
+        {
+            <button class="btn btn-primary" @onclick=@GiveYeehaw>Give @requestingYeehaw a Yeehaw!</button>
+            <p><b>@requestingYeehaw</b> is requesting a Yeehaw!</p>
+        }
+        @if (YeehawReceived)
+        {
+            <p><b>@givingYeehaw</b> sent a Yeehaw!</p>
+            <audio autoplay><source src="/yeehaw.mp3" /></audio>
+        }
+    </div>
     if (endGame)
     {
         <h1>The winner is: @winningPlayer.Name</h1>
-        <p>You're the best at picking stalks! What a useful skill for society!!!</p>
+        @if (username == winningPlayer.Name)
+        {
+            <p><b>Congratulations, that's you!!!!</b>
+            You're the best at picking stalks! What a useful skill for society!!!</p>
+
+        }
+        @if (username != winningPlayer.Name)
+        { 
+            <b>You're terrible at picking stalks! You're fired and your father will never be proud of you!!!</b>
+        }
     }
     else
     {
-        <div>
+        <div style="clear:both">
             <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> Who needs to press 'Start a new year!!!':
             @foreach (player player in playerList)
             {
@@ -90,9 +101,11 @@ else
     @if (stalksBankrupt.Count > 0)
     {
         foreach (string stalk in stalksBankrupt)
-        { 
+        {
             <p><b>@stalk</b><i> went bankrupt!!!</i></p>
         }
+        <audio autoplay><source src="/glass-shattering.mp3" /></audio>
+        <audio autoplay><source src="/wilhelm-scream.mp3" /></audio>
     }
     <table class="table">
         <thead>
@@ -384,7 +397,6 @@ else
                 NewYear();
             }
 
-
         });
 
         hubConnection.On<string>("Yeehaw Requested", (requestedName) =>
@@ -418,6 +430,7 @@ else
         //stalksListToJson = JsonConvert.SerializeObject(stalkList);
         NewYear();
     }
+
 
     Task Send() =>
         hubConnection.SendAsync("InitializeGame", gameStarted, username);
