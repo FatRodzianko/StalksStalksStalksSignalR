@@ -43,6 +43,20 @@ else
     <p> Your username is: @username</p>
     <p> Your connection id is: @playerConnectionId</p>
     -->
+    @if (year == 0)
+    {
+        <audio autoplay loop><source src="/opening-theme.mp3" /></audio>
+    }
+    @if (bullBear == "BULL BULL BULL" && year > 0)
+    {
+        <audio autoplay><source src="/bull1.mp3" /></audio>
+        <audio autoplay><source src="/bull2.mp3" /></audio>
+    }
+    @if (bullBear == "bear..." && year > 0)
+    {
+        <audio autoplay><source src="/bear1.mp3" /></audio>
+        <audio autoplay><source src="/bear2.mp3" /></audio>
+    }
     <div style="float:left;">
         @if (!CanIGetAYeehaw)
         {
@@ -64,12 +78,14 @@ else
         <h1>The winner is: @winningPlayer.Name</h1>
         @if (username == winningPlayer.Name)
         {
-            <p><b>Congratulations, that's you!!!!</b>
-            You're the best at picking stalks! What a useful skill for society!!!</p>
+            <p>
+                <b>Congratulations, that's you!!!!</b>
+                You're the best at picking stalks! What a useful skill for society!!!
+            </p>
 
         }
         @if (username != winningPlayer.Name)
-        { 
+        {
             <b>You're terrible at picking stalks! You're fired and your father will never be proud of you!!!</b>
         }
     }
@@ -252,6 +268,8 @@ else
     }
 
 }
+
+Sounds from Zapsplat.com
 
 @code {
     public bool hidden = true;
