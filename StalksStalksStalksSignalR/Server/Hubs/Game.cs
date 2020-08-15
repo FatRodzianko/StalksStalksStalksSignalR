@@ -128,6 +128,14 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             {
                 stalksOwned.Clear();
             }
+            if (stalksBankrupt.Count > 0)
+            {
+                stalksBankrupt.Clear();
+            }
+            if (stalksBankrupt.Count > 0)
+            {
+                stalksBankrupt.Clear();
+            }
 
             //add the stalks
             stalkList.Add(new stalk("strYker", 100, 0, 10, 50, 15, 45, 0, 0, false));
