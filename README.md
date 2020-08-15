@@ -67,7 +67,33 @@ After `Give <player name> a Yeehaw!` is clicked, the yeehaw sound plays for all 
 
 ![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/8-yeehaw-sent.JPG?raw=true)
 
+### Start a new year
+After you are doing taking your actions, you can click on `Start a new year` to advance the year. This works the same as described above in the Year 0 section. After all players have clicked on `Start a new year`, the year will advance. During the game, this will cause stalks' prices to change and dividends to be paid, which will be covered later.
+
 ### Special Events
 Every year there is a `Special Event` that will affect one Stalk. There will be some flavor text, and then the Stalk price will recieve an additional increase or decrease to its price depending on the event. In Year 0, there is no special event and instead it just wishes you luck in being the best stalk investor.
 
 ![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/9-special-events.JPG?raw=true)
+
+### Year status
+The "Year Status" is the number of the current year and whether it is a `Bear` or `Bull` year (there is no `Bull` or `Bear` status for Year 0). Generally speaking, a `Bear` year means stalk prices go down. A `Bull` year means stalk prices will go up. In any given `Bear` year, there is a 10% chance that an individual stalk's price will actually go up by a small amount. Similarly, in any given `Bull` year, there is a 10% chance that an individual stalk's price will actually go down by a small amount.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/10-bear-or-bull-year.JPG?raw=true)
+
+By default, the likelyhood of a `Bull` year occuring is 60%, and a `Bear` year 40%.
+
+### Stalk Board
+The Stalk Board displays all available stalks and their properties.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/11-stalk-board.JPG?raw=true)
+
+**Stalk Name** The name of the stalk / company
+
+**Price Per Share** The price of 1 stalk. This will be used to calculate whether you can afford to buy a stalk, how much money you receive when selling a stalk, and your current networth for the stalks you own. This value changes with each new year.
+
+**Dividend Per Share (bull)** This is the `dividend` paid to players at the start of each new year if they own the stalk. If you bought 1 stalk of `Soprano's HUD Scam` in Year 1, and in Year 2 it was a `Bull` year, you would be paid a $3 dividend for owning that 1 stalk. If you had bought 2 stalks, you would have been paid $6. Your dividend payment is `Number of stalks owned` multiplied by `Dividend per share (bull)`. This value remains static throughout the game.
+
+**Dividend Per Share (bear)** This is the `dividend` paid to players during `bear` years. It follows the same rules as the `bull` year dividends. This value remains static through the game.
+
+**Yearly Change** This is the amount the price of the stalk has changed from the previous year. This will be either a positive or negative value.
+
