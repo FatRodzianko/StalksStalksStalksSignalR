@@ -138,7 +138,7 @@ As an example: On Year 10, all players buy and sell stalks as usual. They then a
 ## Playing the Game
 When all palyers click on `Start a new year` in Year 0, the game will officially start. The first Year will be Year 1. The year will be randomly choosen to be a `Bear` or `Bull` year. Stalks will adjust their prices. Most importantly, players will now be able to buy and sell stalks.
 
-### Buying stalks
+### Buying and selling stalks
 Below the `Stalk Board` you will see the option to `Make a purchase?`. 
 
 ![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/17-make-a-purchase.JPG?raw=true)
@@ -158,3 +158,11 @@ Below is an example of a player buying 70 stalks of `strYker`.
 Now, in their `Owned Stalks` list, the player will see 70 stalks of `strYker`.
 
 ![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/19-strYker-bought.JPG?raw=true)
+
+In the next example, the player already owns 25 stalks of `Teamsters Pension Fund`. They are going to sell 20 stalks of `Teamsters Pension Fund`.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/20-own-25-teamsters-2.JPG?raw=true)
+
+After the player clicks on `Submit`, their number of owned `Teamsters Pension Fund` stalks decreases from 25 to 5, and their `CashOnHand` value increases.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/21-teamsters-sold-20.JPG?raw=true)
