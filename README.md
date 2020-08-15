@@ -89,7 +89,7 @@ The Stalk Board displays all available stalks and their properties.
 
 **Stalk Name** The name of the stalk / company
 
-**Price Per Share** The price of 1 stalk. This will be used to calculate whether you can afford to buy a stalk, how much money you receive when selling a stalk, and your current networth for the stalks you own. This value changes with each new year.
+**Price Per Share** The price of 1 stalk. This will be used to calculate whether you can afford to buy a stalk, how much money you receive when selling a stalk, and your current networth for the stalks you own. This value changes with each new year (except for `BERRY BOND FROM DIE HARD` whose Price Per Share never changes). All stalks start with a Price Per Share value of `100` in Year 0.
 
 *If the Price Per Share reaches 0*, the stalk is declared `Bankrupt` and is removed from the game. If you owned any stalk that went bankrupt, you lose all money you invested in that stalk.
 
@@ -166,3 +166,36 @@ In the next example, the player already owns 25 stalks of `Teamsters Pension Fun
 After the player clicks on `Submit`, their number of owned `Teamsters Pension Fund` stalks decreases from 25 to 5, and their `CashOnHand` value increases.
 
 ![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/21-teamsters-sold-20.JPG?raw=true)
+
+### Example (Short) Game
+Both `MyPlayerName` and `PlayerNumber2` decide to start the game and begin Year 1. The following `Special Event` and `Year Status` occur.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/22-year-1-new-status-bear-bull.JPG?raw=true)
+
+The `Special Event` results in `My Mutuals and Me Inc.`'s Price Per Share increasing an additional $5 on top of its normal yearly change. The year advanced to Year 1, and the year is a `Bull` year.
+
+The new `Stalk Board` is:
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/23-year-1-stalk-board.JPG)
+
+Note that `My Mutuals and Me Inc.`'s `yearly Change` is 0, but its Price Per Share is 105. This is because the `Special Event` changed `My Mutuals and Me Inc.` by 5.
+
+`MyPlayerName` decides to buy 50 stalks of `strYker`.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/24-myplayername-buy-50-stryker.JPG)
+
+`PlayerNumber2` decides to buy 90 stalks of `My Mutuals and Me Inc.`.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/25-playernumber2-buy-mutuals.JPG)
+
+Both players then click on `Start a new year`. Year 2 is a `Bull` Year. The `Special Event` increases `PG&Enron` by 10. Below is the new `Stalk Board`.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/26-year-2-board.JPG)
+
+`strYker` had a large increase and `Split`. All other stalks have more modest increases.
+
+For `MyPlayerName`, their total owned stalks for `strYker` doubles from 50 to 100 due to the split. Their `NetWorth` is calculated at $11,500. This comes from 100 stalks of `strYker` at 83 per stalk (100 * 83 = 8300) plus their `CashOnHand` of $3200. $8300 + $3200 = $11500.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/27-year-2-myplayername.JPG)
+
+`PlayerNumber` owned 90 stalks of `My Mutuals and Me Inc.
