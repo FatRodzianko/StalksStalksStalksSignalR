@@ -23,3 +23,21 @@ Only one "game" can be played at once. Once everyone who is on the `/Stalks` pag
 
 Example of a game in progress
 ![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/example-stalks-game.PNG?raw=true)
+
+## How to Play
+### Starting the game
+First, everyone will need to click on `Play Stalks`
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/1-click-play-stalks.JPG?raw=true)
+
+Enter your player name and click on `Ready Up`. Your player name cannot be blank.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/2-enter-player-name.JPG?raw=true)
+
+All players at http://stalks.fatrodzianko.com/Stalks will need to `Ready Up` before the game can begin. Clicking `Ready Up` or `Get Users` will show the list of players conencted to the /Stalks page. If the player's last value is set to `true`, they are ready to play. If it is `false`, that player still needs to click `Ready Up`.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/3-waiting-for-ready-up.JPG?raw=true)
+
+Once all players have their ready status at `true`, anyone can click `Start the mother loving game!!!` to begin.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/4-start-the-game.JPG?raw=true)
