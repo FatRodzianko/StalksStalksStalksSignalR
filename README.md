@@ -41,3 +41,33 @@ All players at http://stalks.fatrodzianko.com/Stalks will need to `Ready Up` bef
 Once all players have their ready status at `true`, anyone can click `Start the mother loving game!!!` to begin.
 
 ![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/4-start-the-game.JPG?raw=true)
+
+### Year 0
+After the game is started, everything initializes at Year 0. The StalksStalksStalks theme song will play. To begin the game for real, all players must click on `Start a new year`
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/5-start-year-1.JPG?raw=true)
+
+Next to the `Start a new year` button is a list of players who still need to click on `Start a new year`. After all players have clicked `Start a new Year`, a new year will advance.
+
+### Interface components
+Before describing how to play after Year 0, here is what all the different components on the interface are telling you. These will be described in the order they appear from top to bottom.
+
+#### Can I get a yeehaw
+StalksStalksStalks allows any user to 'request' a yeehaw by clicking the `Can I get a yeehaw?` button.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/6-can-i-get-a-yeehaw.JPG?raw=true)
+
+After a player clicks `Can I get a yeehaw?`, all players will be alerted that someone has requested a yeehaw.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/7-requesting-a-yeehaw.JPG?raw=true)
+
+Any *other* player can send a yeehaw to the requesting player by clicking `Give <player name> a Yeehaw!`. You *cannot* give yourself a yeehaw. Unfortunately, this means single player games cannot participate in yeehaws. If a player tries to give themselves a yeehaw, the yeehaw request is cancelled.
+
+After `Give <player name> a Yeehaw!` is clicked, the yeehaw sound plays for all players. Everyone will be informed of who graciously sent the yeehaw, and the `Can I get a yeehaw?` button will return for future requests.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/8-yeehaw-sent.JPG?raw=true)
+
+### Special Events
+Every year there is a `Special Event` that will affect one Stalk. There will be some flavor text, and then the Stalk price will recieve an additional increase or decrease to its price depending on the event. In Year 0, there is no special event and instead it just wishes you luck in being the best stalk investor.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/9-special-events.JPG?raw=true)
