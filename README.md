@@ -198,4 +198,14 @@ For `MyPlayerName`, their total owned stalks for `strYker` doubles from 50 to 10
 
 ![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/27-year-2-myplayername.JPG)
 
-`PlayerNumber` owned 90 stalks of `My Mutuals and Me Inc.
+`PlayerNumber` owned 90 stalks of `My Mutuals and Me Inc.` It was a `Bull` year, so they received a dividen of $3 per stalk, or 90 * 3 = $270. Their `CashOnHand` at the end of Year 1 was `550`. 550 + 270 = $820 for their new `CashOnHand`. `My Mutuals and Me Inc.` is at 109 per stalk. 109 * 90 = $9,810. Adding the `CashOnHand` of $820, $9,810 + $820 = $10630.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/28-year2-player2.JPG)
+
+Both players decide they have had enough, and choose to `End it all now?` on Year 2. The year advances to Year 3. It is another `Bull` year. The `Special Event` increases `Soprano's HUD Scam` by 10. `MyPlayerName`'s stalks in `strYker` increase yet again, resulting in `MyPlayerName` declared as the winner.
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/29-myplayername-winner-stryker-baby.JPG)
+
+The scoreboard shows that `MyPlayerName` beat `PlayerNumber2` by almost $4,000. That's the power of `strYker` baby!
+
+![](https://github.com/FatRodzianko/StalksStalksStalksSignalR/blob/master/How-To-Play/30-year-3-scoreboard.JPG)
