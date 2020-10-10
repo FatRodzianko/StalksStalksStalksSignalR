@@ -69,10 +69,27 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
         public async Task ReadyUp(string username)
         {
-            CreatePlayer(username, Context.ConnectionId);
+            //CreatePlayer(username, Context.ConnectionId);
+            player RequestingPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
+            RequestingPlayer.Ready = true;
             bool allPlayersReady = CheckIfPlayersReady();
             player currentPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
-            await Clients.All.SendAsync("Readied User", JsonConvert.SerializeObject(playerList), allPlayersReady, JsonConvert.SerializeObject(currentPlayer));
+            await Clients.Caller.SendAsync("Readied User", JsonConvert.SerializeObject(playerList), allPlayersReady, JsonConvert.SerializeObject(currentPlayer));
+        }
+        public async Task CreatePlayerName(string playername)
+        {
+            bool userNameTaken = playerList.Any(x => x.Name == playername);
+            player RequestingPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
+            if (!userNameTaken)
+            {
+                RequestingPlayer.Name = playername;
+            }
+            else if (userNameTaken)
+            {
+                RequestingPlayer.Name = "";
+            }
+
+            await Clients.Caller.SendAsync("Player Name Added", JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(RequestingPlayer));
         }
 
         public async Task EndGame()
@@ -285,24 +302,22 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
         public void CreatePlayer(string playerName, string connectionid)
         {
+            playerList.Add(new player(playerName, connectionid, 10000, 0, false, false, false));
+            /*
             bool exists = playerList.Any(x => x.ConnectionId == connectionid);
             bool nameExists = playerList.Any(x => x.Name == playerName);
 
+            player RequestingPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
+
             if (exists && !nameExists)
             {
-                foreach (player player in playerList.Where(w => w.ConnectionId == connectionid))
-                {
-                    player.Name = playerName;
-                    if (!GameAlready)
-                    {
-                        player.Ready = true;
-                    }
-                }
+                RequestingPlayer.Name = playerName;
             }
             else if (!exists)
             {
                 playerList.Add(new player(playerName, connectionid, 10000, 0, false, false, false));
             }
+            */
 
         }
 
@@ -431,7 +446,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                 }
             }
 
-            await Clients.All.SendAsync("Bought Stalks", JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(stalksOwned));
+            await Clients.Caller.SendAsync("Bought Stalks", JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(stalksOwned));
         }
 
         public void GetNetWorth()

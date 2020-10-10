@@ -1,7 +1,7 @@
 ﻿@page "/stalks"
 
 @using Microsoft.AspNetCore.SignalR.Client
-@inject NavigationManager NavigationManager
+@inject NavigationManager navigationManager
 @implements IDisposable
 @using StalksStalksStalksSignalR.Shared
 @using System.Text.Json;
@@ -14,15 +14,36 @@
 {
     <p>Please enter your name!</p>
     <p></p>
-    <EditForm Model=@currentPlayer OnSubmit=@ReadyUp>
-        <InputText @bind-Value="username" />
-        <input type="submit" value="Ready Up" class="btn btn-primary" />
-    </EditForm>
-    <p>List of connected users</p>
-    <button class="btn btn-primary" @onclick="GetUsers">Get Users</button>
-    @foreach (player player in playerList)
+    @if (currentPlayer.Name == "")
     {
-        <p>@player.Name : @player.ConnectionId : @player.Ready.ToString()</p>
+    <EditForm Model=@currentPlayer OnSubmit=@CreatePlayerName>
+        <InputText @bind-Value="username" />
+        <input type="submit" value="Create User Name" class="btn btn-primary" />
+    </EditForm>
+    }
+    @if (currentPlayer.Name != "")
+    {
+        <button class="btn btn-primary" @onclick="ReadyUp">Click here if you are ready to play!</button>
+    }
+    <p>List of connected users</p>
+    <button class="btn btn-primary" @onclick="GetUsers">Show list of users</button>
+    @if (playerList.Count > 0)
+    {
+        <table class="table">
+            <tr>
+                <th>Player Name</th>
+                <th>Player Connection ID</th>
+                <th>ready?</th>
+            </tr>
+            @foreach (player player in playerList)
+            {
+                <tr>
+                    <td>@player.Name</td>
+                    <td>@player.ConnectionId</td>
+                    <td>@player.Ready.ToString()</td>
+                </tr>
+            }
+        </table>
     }
 
     @if (allPlayersReady)
@@ -285,7 +306,7 @@ Sounds from Zapsplat.com
 
     public string stalksListToJson;
 
-    public player currentPlayer = new player("It'sa me-a Mario", "", 10000, 0, false, false, false);
+    public player currentPlayer = new player("", "", 10000, 0, false, false, false);
     public string username = "";
     public List<player> playerList = new List<player>();
     public bool allPlayersReady = false;
@@ -317,7 +338,7 @@ Sounds from Zapsplat.com
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/Game"))
+            .WithUrl(navigationManager.ToAbsoluteUri("/Game"))
             .Build();
 
         hubConnection.On<string>("Returned users", (usersToJson) =>
@@ -331,13 +352,23 @@ Sounds from Zapsplat.com
             playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
             allPlayersReady = arePlayersReady;
 
-            if (!gotConnectionId && username != "")
-            {
-                currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerInfo, currentPlayer);
-                playerConnectionId = currentPlayer.ConnectionId;
-                gotConnectionId = true;
-            }
+        /*
+        if (!gotConnectionId && username != "")
+        {
+            currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerInfo, currentPlayer);
+            playerConnectionId = currentPlayer.ConnectionId;
+            gotConnectionId = true;
+        }*/
 
+            StateHasChanged();
+        });
+
+        hubConnection.On<string, string>("Player Name Added", (playerListToJson, currentPlayerToJson) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerToJson, currentPlayer);
+            gotConnectionId = true;
+            playerConnectionId = currentPlayer.ConnectionId;
             StateHasChanged();
         });
 
@@ -466,6 +497,8 @@ Sounds from Zapsplat.com
         hubConnection.SendAsync("RequestYeehaw");
     Task GiveYeehaw() =>
         hubConnection.SendAsync("GiveYeehaw");
+    Task CreatePlayerName() =>
+        hubConnection.SendAsync("CreatePlayerName", username);
 
     public bool IsConnected =>
 hubConnection.State == HubConnectionState.Connected;
