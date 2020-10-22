@@ -56,6 +56,7 @@ namespace StalksStalksStalksSignalR.Server
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
                 endpoints.MapHub<Game>("/Game");
+                endpoints.MapHub<CardConquestHub>("/CardConquestHub");
                 endpoints.MapFallbackToFile("index.html");
             });
         }

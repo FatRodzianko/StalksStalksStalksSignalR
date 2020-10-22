@@ -1,0 +1,650 @@
+﻿@page "/CardConquest"
+
+@using Microsoft.AspNetCore.SignalR.Client;
+@inject NavigationManager navigationManager
+@implements IDisposable
+@using StalksStalksStalksSignalR.Shared
+@using System.Text.Json;
+@using Newtonsoft.Json;
+@using System.Web.Script.Serialization;
+
+<h3>CardConquest</h3>
+
+@if (!areAllPlayersReady)
+{
+    if (currentPlayer.PlayerName == "")
+    {
+        <p>Please enter your name!</p>
+        <p></p>
+        <EditForm Model=@currentPlayer OnSubmit=@CreatePlayerName>
+            <InputText @bind-Value="username" />
+            <input type="submit" value="Create User Name" class="btn btn-primary" />
+        </EditForm>
+    }
+    else if ((!String.IsNullOrEmpty(currentPlayer.PlayerName)) && (currentPlayer.RoomName.Equals("")))
+    {
+        <p>Create or join a room</p>
+        <EditForm Model=@room OnSubmit=@CreateOrJoinRoom>
+            <InputText @bind-Value="roomName" />
+            <input type="submit" value="Create Or Join Room" class="btn btn-primary" />
+        </EditForm>
+
+        <p>List of available rooms:</p>
+        <table class="table">
+            <tr>
+                <th>Room name</th>
+                <th>Number of Players</th>
+            </tr>
+            @foreach (Rooms room in roomList)
+            {
+                <tr>
+                    <td>@room.RoomName</td>
+                    <td>@room.Players.Count()</td>
+                </tr>
+            }
+        </table>
+        <button class="btn btn-primary" @onclick="GetRooms">Refresh Room List</button>
+    }
+    else
+    {
+        <p>Welcome, @currentPlayer.PlayerName Connection ID: @playerConnectionId</p>
+        <p>You are in room: <b>@currentPlayer.RoomName</b></p>
+        <p>Current player statuses:</p>
+        @foreach (CCPlayer player in playerList)
+        {
+            <p>@player.PlayerName : @player.ConnectionId : @player.Ready.ToString() : @player.RoomName</p>
+        }
+        <button class="btn btn-primary" @onclick="ReadyUp">Click here if you are ready to play!</button>
+        <button class="btn btn-primary" @onclick="GetUsers">Update Users' Status</button>
+    }
+
+}
+@if ((areAllPlayersReady) && (!isGameOver))
+{
+    <p>
+        All players are ready! <br />
+        @currentPlayer.PlayerName : @currentPlayer.Ready.ToString()
+    </p>
+    <p>Phase : @gamePhase</p>
+    @foreach (CCPlayer player in playerGame.Room.Players)
+    {
+        <p>@player.PlayerName : @player.Ready.ToString()</p>
+    }
+    <p>FYI your stuff is on the left!</p>
+    <table style="width:100%" border="0">
+        <tr>
+            <td style="width:33%">@currentPlayer.PlayerName's Wins: @currentPlayer.TotalWins.ToString()</td>
+            <td style="width:34%"><h3>Round Number: @playerGame.RoundNumber</h3></td>
+            <td style="width:33%">@opponentPlayer.PlayerName's Wins: @opponentPlayer.TotalWins.ToString()</td>
+        </tr>
+        @if (isLastRound)
+        {
+            <tr>
+                <td style="width:100%;text-align:center">
+                    <h3>This is the last round</h3>
+                </td>
+            </tr>
+        }
+    </table>
+
+    @if (!String.IsNullOrEmpty(noUnitsError))
+    {
+        <table style="width:100%" border="0">
+            <tr>
+                <td style="width:100%;text-align:center">
+                    <h5>@noUnitsError</h5>
+                </td>
+            </tr>
+        </table>
+    }
+
+    <table class="table-bordered" style="width:100%">
+        <tr>
+            <th>Your Available Cards and Units</th>
+            <th>@opponentPlayer.PlayerName's Available Cards and Units</th>
+        </tr>
+        <tr>
+            <td>
+                <table style="width:100%">
+                    <tr>
+                        <th>Your Hand</th>
+                        <th>Your Units</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            @foreach (Card card in currentPlayer.Hand)
+                            {
+                                <pre>@card.AsciiArt</pre>
+                            }
+                        </td>
+                        <td style="vertical-align:top;width:50%">
+                            <b>Available Tanks (Power 2)</b>
+                            <p>@currentPlayer.AvailableTanks</p>
+                            <b>Available Infantry (Power 1)</b>
+                            <p>@currentPlayer.AvailableInf</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table style="width:100%">
+                    <tr>
+                        <th>@opponentPlayer.PlayerName's Hand</th>
+                        <th>@opponentPlayer.PlayerName's Units</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            @foreach (Card card in opponentPlayer.Hand)
+                            {
+                                <pre>@card.AsciiArt</pre>
+                            }
+                        </td>
+                        <td style="vertical-align:top;width:50%">
+                            <b>Available Tanks (Power 2)</b>
+                            <p>@opponentAvailableTanks</p>
+                            <b>Available Infantry (Power 1)</b>
+                            <p>@opponentAvailableInf</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table style="width:100%">
+
+                    @if (playerGame.Phase == "Card Selection")
+                    {
+                        <tr>
+                            <th>Select Card</th>
+                            <th>Your Army</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <EditForm Model="@emptyCard" OnSubmit="@SubmitCard">
+                                    <InputSelect @bind-Value="@emptyCard.CardName">
+                                        @foreach (var card in currentPlayer.Hand)
+                                                {
+                                            <option value="@card.CardName">@card.CardName</option>
+                                                }
+                                    </InputSelect>
+                                    <input type="submit" value="Submit" class="btn btn-primary" />
+                                </EditForm>
+                                @if (!String.IsNullOrEmpty(cardError))
+                                {
+                                    <b>@cardError</b>
+                                }
+                            </td>
+                            <td>
+                                <b>Tanks: </b>@currentPlayerArmy.Tanks <br />
+                                <b>Infantry: </b>@currentPlayerArmy.Infantry<br />
+                                <b>Total Power: </b>@currentPlayerUnitPower
+                            </td>
+                        </tr>
+                    }
+                    else if (playerGame.Phase == "Unit Selection")
+                    {
+                        <tr>
+                            <th></th>
+                            <th>Select Units</th>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                @if (currentPlayerUnitPower == 0)
+                                {
+                                    <EditForm Model="@currentPlayerArmy" OnSubmit="@SubmitUnits">
+                                        <InputNumber @bind-Value="@currentPlayerArmy.Tanks">0</InputNumber>
+                                        <InputNumber @bind-Value="@currentPlayerArmy.Infantry">0</InputNumber>
+                                        <input type="submit" value="Submit" class="btn btn-primary" />
+                                    </EditForm>
+                                }
+                                else if (currentPlayerUnitPower > 0)
+                                {
+                                    <b>The power of your units is: </b>@currentPlayerUnitPower <b>Tanks: </b> @currentPlayerArmy.Tanks.ToString() <b>Infantry: </b>@currentPlayerArmy.Infantry.ToString()
+                                }
+
+                                @if (!String.IsNullOrEmpty(unitError))
+                                {
+                                    <b>@unitError</b>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    else if (playerGame.Phase == "Battle Resolution")
+                    {
+                        <tr>
+                            <th>Your Card</th>
+                            <th>Your Army</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <pre>@currentPlayerArmy.PlayerCard.AsciiArt</pre>
+                            </td>
+                            <td>
+                                <b>Tanks: </b>@currentPlayerArmy.Tanks <br />
+                                <b>Infantry: </b>@currentPlayerArmy.Infantry<br />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><b>Your Army's Total Power:</b> @currentPlayerUnitPower</td>
+                            <td>
+                                @if (playerGame.WinningPlayer == currentPlayer.PlayerName)
+                                {
+                                    <b>You won!!!</b>
+                                }
+                                else if (playerGame.WinningPlayer == "tie")
+                                {
+                                    <pre>It's a tie. No one wins</pre>
+                                }
+                                else
+                                {
+                                    <i>You lost...</i>
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="BattleCleanUp">Battle cleanup</button>
+                            </td>
+                        </tr>
+
+                    }
+
+                </table>
+            </td>
+            <td>
+                <table style="width:100%">
+
+                    @if (playerGame.Phase == "Card Selection")
+                    {
+                        <tr>
+                            <th></th>
+                            <th>@opponentArmy.PlayerName's Army</th>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <b>Tanks: </b>@opponentArmy.Tanks<br />
+                                <b>Infantry: </b>@opponentArmy.Infantry<br />
+                                <b>Total Power: </b>@opponentUnitPower
+                            </td>
+                        </tr>
+                    }
+                    else if (playerGame.Phase == "Unit Selection")
+                    {
+                        <tr>
+                            <th></th>
+                            <th>@opponentPlayer.PlayerName is picking their army...</th>
+                        </tr>
+                        <tr>
+                        </tr>
+                    }
+                    else if (playerGame.Phase == "Battle Resolution")
+                    {
+                        <tr>
+                            <th>@opponentPlayer.PlayerName's Card</th>
+                            <th>@opponentPlayer.PlayerName's Army</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <pre>@opponentArmy.PlayerCard.AsciiArt</pre>
+                            </td>
+                            <td>
+                                <b>Tanks: </b>@opponentArmy.Tanks <br />
+                                <b>Infantry: </b>@opponentArmy.Infantry<br />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><b>@opponentPlayer.PlayerName Army's Total Power:</b> @opponentUnitPower</td>
+                        </tr>
+
+                    }
+
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table style="width:100%">
+                    <tr>
+                        <th>Discard pile</th>
+                        <th>Units in cooldown</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            @foreach (Card card in currentPlayer.DiscardPile)
+                            {
+                                <pre>@card.AsciiArt</pre>
+                            }
+                        </td>
+                        <td style="vertical-align:top;width:50%">
+                            <b>Tanks in cooldown</b>
+                            <p>@currentPlayer.UnavailableTanks</p>
+                            <b>Infantry in cooldown</b>
+                            <p>@currentPlayer.UnavailableInf</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table style="width:100%">
+                    <tr>
+                        <th>@opponentPlayer.PlayerName's discard pile</th>
+                        <th>@opponentPlayer.PlayerName's units in cooldown</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            @foreach (Card card in opponentPlayer.DiscardPile)
+                            {
+                                <pre>@card.AsciiArt</pre>
+                            }
+                        </td>
+                        <td style="vertical-align:top;width:50%">
+                            <b>Tanks in cooldown</b>
+                            <p>@opponentPlayer.UnavailableTanks</p>
+                            <b>Infantry in cooldown</b>
+                            <p>@opponentPlayer.UnavailableInf</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+}
+else if (isGameOver)
+{
+    <table style="width:100%" border="0">
+        <tr>
+            <td style="width:100%;text-align:center">
+                <h3>The long war has come to and end...</h3>
+            </td>
+        </tr>
+        <tr>
+            <td style="width:100%;text-align:center">
+                <h3>History will forever remember the victor as...</h3>
+            </td>
+        </tr>
+        <tr>
+            <td style="width:100%;text-align:center">
+                @if (playerGame.WinningPlayer == "tie")
+                {
+                    <h3>No one! Fight again, you cowrads!</h3>
+                }
+                else if (playerGame.WinningPlayer == currentPlayer.PlayerName)
+                {
+                    <h3>@playerGame.WinningPlayer!</h3>
+                    <h5>Songs will be sung of your victories for all eternity!</h5>
+                }
+                else if (playerGame.WinningPlayer == opponentPlayer.PlayerName)
+                {
+                    <h3>@playerGame.WinningPlayer ...</h3>
+                    <h5>You are forever disgraced. Your name will become synonymous with failure and ineptitude</h5>
+                }
+            </td>
+        </tr>
+    </table>
+}
+
+@code {
+    public bool isGameStarted = false;
+
+    List<Card> emptyCardList = new List<Card>();
+
+    public CCPlayer currentPlayer = new CCPlayer("", "", false, "", 4, 6, 0, 0, null, null, 0);
+    public CCPlayer opponentPlayer = new CCPlayer("", "", false, "", 4, 6, 0, 0, null, null, 0);
+    public string username;
+    public string playerConnectionId;
+    bool gotConnectionId = false;
+    public List<CCPlayer> playerList = new List<CCPlayer>();
+    public List<CCPlayer> roomPlayers = new List<CCPlayer>();
+    public string roomName;
+    public List<Rooms> roomList = new List<Rooms>();
+    public bool gameStarted = false;
+    public bool areAllPlayersReady = false;
+
+    public Rooms room = new Rooms("", null);
+    public CCGame playerGame = new CCGame(1, "", null, null, "");
+    public Army currentPlayerArmy = new Army("", 0, 0, null);
+    public Army opponentArmy = new Army("", 0, 0, null);
+    public Army emptyArmy = new Army("", 0, 0, null);
+    public Card emptyCard = new Card("", 0, 0, 0, "");
+
+    public string gamePhase;
+    public string unitError;
+    public string cardError;
+    public int opponentAvailableTanks;
+    public int opponentAvailableInf;
+    public int currentPlayerUnitPower;
+    public int opponentUnitPower;
+    public bool isGameOver = false;
+    public bool isLastRound = false;
+    public string noUnitsError = null;
+
+    private HubConnection hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(navigationManager.ToAbsoluteUri("/CardConquestHub"))
+            .Build();
+        //Return a list of users
+        hubConnection.On<string>("Returned users", (usersToJson) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(usersToJson, playerList);
+            StateHasChanged();
+        });
+        //Return list of rooms
+        hubConnection.On<string>("Returned rooms", (roomListToJson) =>
+        {
+            roomList = JsonConvert.DeserializeAnonymousType(roomListToJson, roomList);
+            StateHasChanged();
+        });
+
+        // After a user updated their username
+        hubConnection.On<string, string, string>("Player Name Added", (playerListToJson, currentPlayerToJson, roomListToJson) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerToJson, currentPlayer);
+            gotConnectionId = true;
+            playerConnectionId = currentPlayer.ConnectionId;
+            roomList = JsonConvert.DeserializeAnonymousType(roomListToJson, roomList);
+            StateHasChanged();
+        });
+        // Player joins or creates a room
+        hubConnection.On<string, string, string>("Room Joined", (playerListToJson, currentPlayerToJson, roomListToJson) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerToJson, currentPlayer);
+            roomList = JsonConvert.DeserializeAnonymousType(roomListToJson, roomList);
+            StateHasChanged();
+        });
+
+        hubConnection.On<string, bool, string, string>("User Readied", (playerListToJson, arePlayersReady, roomPlayersToJson, playerGameToJson) =>
+        {
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            //currentPlayer = playerList.First(x => x.PlayerName == currentPlayer.PlayerName);
+            roomPlayers = JsonConvert.DeserializeAnonymousType(roomPlayersToJson, roomPlayers);
+            areAllPlayersReady = arePlayersReady;
+            if (areAllPlayersReady)
+            {
+                //opponentPlayer = roomPlayers.First(x => x.PlayerName != currentPlayer.PlayerName);
+                playerGame = JsonConvert.DeserializeAnonymousType(playerGameToJson, playerGame);
+                gamePhase = playerGame.Phase;
+                currentPlayer = playerGame.Room.Players.First(x => x.PlayerName == currentPlayer.PlayerName);
+                currentPlayerArmy = playerGame.Armies.First(x => x.PlayerName == currentPlayer.PlayerName);
+                opponentPlayer = playerGame.Room.Players.First(x => x.PlayerName != currentPlayer.PlayerName);
+                opponentArmy = playerGame.Armies.First(x => x.PlayerName == opponentPlayer.PlayerName);
+                opponentAvailableTanks = opponentPlayer.AvailableTanks;
+                opponentAvailableInf = opponentPlayer.AvailableInf;
+            }
+            StateHasChanged();
+        });
+        //Receiving submitted units
+        hubConnection.On<string>("Units Submitted To Group", (playerGameToJson) =>
+        {
+            playerGame = JsonConvert.DeserializeAnonymousType(playerGameToJson, playerGame);
+            gamePhase = playerGame.Phase;
+            currentPlayer = playerGame.Room.Players.First(x => x.PlayerName == currentPlayer.PlayerName);
+            currentPlayerArmy = playerGame.Armies.First(x => x.PlayerName == currentPlayer.PlayerName);
+            opponentPlayer = playerGame.Room.Players.First(x => x.PlayerName != currentPlayer.PlayerName);
+            opponentArmy = playerGame.Armies.First(x => x.PlayerName == opponentPlayer.PlayerName);
+            currentPlayerUnitPower = (currentPlayerArmy.Tanks * 2) + currentPlayerArmy.Infantry;
+            opponentUnitPower = (opponentArmy.Tanks * 2) + opponentArmy.Infantry;
+            StateHasChanged();
+        });
+        hubConnection.On<string>("Card Submitted To Group", (playerGameToJson) =>
+        {
+            playerGame = JsonConvert.DeserializeAnonymousType(playerGameToJson, playerGame);
+            gamePhase = playerGame.Phase;
+            currentPlayer = playerGame.Room.Players.First(x => x.PlayerName == currentPlayer.PlayerName);
+            currentPlayerArmy = playerGame.Armies.First(x => x.PlayerName == currentPlayer.PlayerName);
+            opponentPlayer = playerGame.Room.Players.First(x => x.PlayerName != currentPlayer.PlayerName);
+            opponentArmy = playerGame.Armies.First(x => x.PlayerName == opponentPlayer.PlayerName);
+            currentPlayerUnitPower = (currentPlayerArmy.Tanks * 2) + currentPlayerArmy.Infantry + currentPlayerArmy.PlayerCard.Power;
+            opponentUnitPower = (opponentArmy.Tanks * 2) + opponentArmy.Infantry + opponentArmy.PlayerCard.Power;
+            StateHasChanged();
+        });
+        hubConnection.On<string, bool, bool, string>("Battle Completed", (playerGameToJson, isGameOverFromGroup, isLastRoundFromGroup, noUnitsErrorFromGroup) =>
+        {
+            playerGame = JsonConvert.DeserializeAnonymousType(playerGameToJson, playerGame);
+            gamePhase = playerGame.Phase;
+            currentPlayer = playerGame.Room.Players.First(x => x.PlayerName == currentPlayer.PlayerName);
+            currentPlayerArmy = playerGame.Armies.First(x => x.PlayerName == currentPlayer.PlayerName);
+            opponentPlayer = playerGame.Room.Players.First(x => x.PlayerName != currentPlayer.PlayerName);
+            opponentArmy = playerGame.Armies.First(x => x.PlayerName == opponentPlayer.PlayerName);
+            currentPlayerUnitPower = (currentPlayerArmy.Tanks * 2) + currentPlayerArmy.Infantry;
+            opponentUnitPower = (opponentArmy.Tanks * 2) + opponentArmy.Infantry;
+            opponentAvailableTanks = opponentPlayer.AvailableTanks;
+            opponentAvailableInf = opponentPlayer.AvailableInf;
+            if (playerGame.Room.Players.All(x => x.Ready == false))
+            {
+                isGameOver = isGameOverFromGroup;
+                isLastRound = isLastRoundFromGroup;
+            }
+
+            if (isGameOver)
+            {
+                if (currentPlayer.TotalWins > opponentPlayer.TotalWins)
+                {
+                    playerGame.WinningPlayer = currentPlayer.PlayerName;
+                }
+                else if (currentPlayer.TotalWins < opponentPlayer.TotalWins)
+                {
+                    playerGame.WinningPlayer = opponentPlayer.PlayerName;
+                }
+                else if (currentPlayer.TotalWins == opponentPlayer.TotalWins)
+                {
+                    playerGame.WinningPlayer = "tie";
+                }
+            }
+            noUnitsError = noUnitsErrorFromGroup;
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    public void SubmitUnits()
+    {
+        int totalUnits = currentPlayerArmy.Tanks + currentPlayerArmy.Infantry;
+        if (totalUnits > 0)
+        {
+            if ((currentPlayerArmy.Tanks <= currentPlayer.AvailableTanks) && (currentPlayerArmy.Infantry <= currentPlayer.AvailableInf))
+            {
+                foreach (Army army in playerGame.Armies)
+                {
+                    if (army.PlayerName == currentPlayer.PlayerName)
+                    {
+                        army.Tanks = currentPlayerArmy.Tanks;
+                        army.Infantry = currentPlayerArmy.Infantry;
+                        currentPlayerUnitPower = (currentPlayerArmy.Tanks * 2) + currentPlayerArmy.Infantry;
+                    }
+                }
+                foreach (CCPlayer player in playerGame.Room.Players)
+                {
+                    if (player.PlayerName == currentPlayer.PlayerName)
+                    {
+                        player.Ready = true;
+                    }
+                }
+                unitError = null;
+                SubmitUnitsToGroup();
+            }
+            else
+            {
+                unitError = "Not enough available units";
+            }
+        }
+        else
+        {
+            unitError = "You must select at least one unit";
+        }
+    }
+
+    public void SubmitCard()
+    {
+        if (!String.IsNullOrEmpty(emptyCard.CardName))
+        {
+            foreach (Army army in playerGame.Armies)
+            {
+                if (army.PlayerName == currentPlayerArmy.PlayerName)
+                {
+                    Card selectedCard = currentPlayer.Hand.First(x => x.CardName == emptyCard.CardName);
+                    army.PlayerCard = selectedCard;
+                }
+
+            }
+            foreach (CCPlayer player in playerGame.Room.Players)
+            {
+                if (player.PlayerName == currentPlayer.PlayerName)
+                {
+                    player.Ready = true;
+                }
+            }
+            cardError = null;
+            SubmitCardToGroup();
+        }
+        else
+        {
+            cardError = "you must select a card";
+        }
+    }
+
+    public void BattleCleanUp()
+    {
+        foreach (CCPlayer player in playerGame.Room.Players)
+        {
+            if (player.PlayerName == currentPlayer.PlayerName)
+            {
+                player.Ready = true;
+            }
+        }
+        BattleCleanUpToGroup();
+    }
+
+    Task CreatePlayerName() =>
+        hubConnection.SendAsync("CreatePlayerName", username);
+    Task GetUsers() =>
+        hubConnection.SendAsync("GetUsers");
+    Task ReadyUp() =>
+        hubConnection.SendAsync("ReadyUp");
+    Task CreateOrJoinRoom() =>
+        hubConnection.SendAsync("CreateOrJoinRoom", roomName);
+    Task GetRooms() =>
+        hubConnection.SendAsync("GetRooms");
+    Task SubmitUnitsToGroup() =>
+        hubConnection.SendAsync("SubmitUnitsToGroup", JsonConvert.SerializeObject(playerGame));
+    Task SubmitCardToGroup() =>
+        hubConnection.SendAsync("SubmitCardToGroup", JsonConvert.SerializeObject(playerGame));
+    Task BattleCleanUpToGroup() =>
+        hubConnection.SendAsync("BattleCleanUpToGroup", JsonConvert.SerializeObject(playerGame));
+
+
+    public bool IsConnected =>
+hubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        _ = hubConnection.DisposeAsync();
+    }
+
+}

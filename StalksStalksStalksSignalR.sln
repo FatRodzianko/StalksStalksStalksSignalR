@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StalksStalksStalksSignalR.Server", "StalksStalksStalksSignalR\Server\StalksStalksStalksSignalR.Server.csproj", "{1A9E456D-C391-4EC2-B7F6-A158ECB671EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StalksStalksStalksSignalR.Server", "StalksStalksStalksSignalR\Server\StalksStalksStalksSignalR.Server.csproj", "{1A9E456D-C391-4EC2-B7F6-A158ECB671EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StalksStalksStalksSignalR.Client", "StalksStalksStalksSignalR\Client\StalksStalksStalksSignalR.Client.csproj", "{17A14506-E212-4A01-9784-8A9E4A059177}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StalksStalksStalksSignalR.Client", "StalksStalksStalksSignalR\Client\StalksStalksStalksSignalR.Client.csproj", "{17A14506-E212-4A01-9784-8A9E4A059177}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StalksStalksStalksSignalR.Shared", "StalksStalksStalksSignalR\Shared\StalksStalksStalksSignalR.Shared.csproj", "{F6009F74-8150-4B97-923E-A191120B2C42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StalksStalksStalksSignalR.Shared", "StalksStalksStalksSignalR\Shared\StalksStalksStalksSignalR.Shared.csproj", "{F6009F74-8150-4B97-923E-A191120B2C42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
