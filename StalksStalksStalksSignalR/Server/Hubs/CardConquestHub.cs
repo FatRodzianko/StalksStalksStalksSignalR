@@ -63,6 +63,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             catch (Exception e) { }
             if (!String.IsNullOrEmpty(roomJoined.RoomName))
             {
+                // git changes.. 
                 //Rooms roomJoined = roomList.First(x => x.RoomName == RequestingPlayer.RoomName);
                 CCPlayer playerToRemove = new CCPlayer(null, null, false, null, 0, 0, 0, 0, null, null, 0);
                 try
