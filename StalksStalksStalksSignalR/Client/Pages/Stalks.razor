@@ -112,8 +112,82 @@ else
     }
     else
     {
-        <div style="clear:both">
-            @if (!currentPlayer.HasLoan)
+<div style="clear:both">
+    @if (!currentPlayer.HasLoan)
+    {
+        <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+            Who needs to press 'Start a new year!!!':
+            @foreach (player player in playerList)
+            {
+                @if (player.StartNewYear == false && player.Ready != false)
+                {
+                    <b> || @player.Name || </b>
+                }
+            }
+        </p>
+    }
+    else if (currentPlayer.HasLoan && playerLoan.LoanBalance == 0)
+    {
+        <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+            Who needs to press 'Start a new year!!!':
+            @foreach (player player in playerList)
+            {
+                @if (player.StartNewYear == false && player.Ready != false)
+                {
+                    <b> || @player.Name || </b>
+                }
+            }
+        </p>
+    }
+    else if (currentPlayer.HasLoan && playerLoan.YearsRemaining == 11)
+    {
+        <b>You have a loan. You will need to start paying it off next year.</b><br />
+        <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+            Who needs to press 'Start a new year!!!':
+            @foreach (player player in playerList)
+            {
+                @if (player.StartNewYear == false && player.Ready != false)
+                {
+                    <b> || @player.Name || </b>
+                }
+            }
+        </p>
+    }
+    else if (currentPlayer.HasLoan && playerLoan.YearsRemaining < 11 && !playerLoan.PaidThisYear)
+    {
+        @if (!playerDontPayLoan || !playerDontPayLoadConfirmation)
+        {
+            <b>You're loan balance is: @playerLoan.LoanBalance</b><br />
+            <b>You're minimum loan payment is: @playerLoan.MinPayment</b><br />
+            <b>Years remaining on the loan: @playerLoan.YearsRemaining</b><br />
+            @if (playerLoan.MissedPayments == 1)
+            {
+                <b>You've missed one payment.</b>
+            }
+            else if (playerLoan.MissedPayments == 2)
+            {
+                <b>You've missed two payments. One more missed payment and the bank will sieze all your assets.</b>
+            }
+            <EditForm Model=@loanPurchaseOrPayment OnSubmit=@PayLoan>
+                <InputText type="hidden" @bind-Value="loanPurchaseOrPayment.PurchaseOrPayment">Payment</InputText>
+                <InputNumber @bind-Value="loanPurchaseOrPayment.DollarAmount">0</InputNumber>
+                <input type="submit" value="Submit" class="btn btn-primary" />
+            </EditForm>
+            @if (!String.IsNullOrEmpty(loanPaymentError))
+            {
+                <b>@loanPaymentError</b>
+            }
+
+            @if (!playerDontPayLoan && !playerDontPayLoadConfirmation)
+            {
+                <button class="btn btn-primary" @onclick=@DontPayLoan>I don't want to pay my loan</button>
+            }
+            else if (playerDontPayLoan)
+            {
+                <b>If you don't pay your loan, you will be penalized. This can not be undone</b>
+                <button class="btn btn-primary" @onclick=@DontPayLoanConfirmation>I REALLY don't want to pay my loan</button>
+            }
+            else if (playerDontPayLoadConfirmation && !playerDontPayLoan)
             {
                 <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
                     Who needs to press 'Start a new year!!!':
@@ -126,111 +200,51 @@ else
                     }
                 </p>
             }
-            else if (currentPlayer.HasLoan && playerLoan.YearsRemaining == 11)
-            {
-                <b>You have a loan. You will need to start paying it off next year.</b><br />
-                <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
-                    Who needs to press 'Start a new year!!!':
-                    @foreach (player player in playerList)
-                    {
-                        @if (player.StartNewYear == false && player.Ready != false)
-                        {
-                            <b> || @player.Name || </b>
-                        }
-                    }
-                </p>
-            }
-            else if (currentPlayer.HasLoan && playerLoan.YearsRemaining < 11 && !playerLoan.PaidThisYear)
-            {
-                @if (!playerDontPayLoan || !playerDontPayLoadConfirmation)
+        }
+        else if (playerDontPayLoadConfirmation || playerLoan.PaidThisYear)
+        {
+            <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+                Who needs to press 'Start a new year!!!':
+                @foreach (player player in playerList)
                 {
-                    <b>You're loan balance is: @playerLoan.LoanBalance</b><br />
-                    <b>You're minimum loan payment is: @playerLoan.MinPayment</b><br />
-                    <b>Years remaining on the loan: @playerLoan.YearsRemaining</b><br />
-                    @if (playerLoan.MissedPayments == 1)
+                    @if (player.StartNewYear == false && player.Ready != false)
                     {
-                        <b>You've missed one payment.</b>
-                    }
-                    else if (playerLoan.MissedPayments == 2)
-                    {
-                        <b>You've missed two payments. One more missed payment and the bank will sieze all your assets.</b>
-                    }
-                    <EditForm Model=@loanPurchaseOrPayment OnSubmit=@PayLoan>
-                        <InputText type="hidden" @bind-Value="loanPurchaseOrPayment.PurchaseOrPayment">Payment</InputText>
-                        <InputNumber @bind-Value="loanPurchaseOrPayment.DollarAmount">0</InputNumber>
-                        <input type="submit" value="Submit" class="btn btn-primary" />
-                    </EditForm>
-                    @if (!String.IsNullOrEmpty(loanPaymentError))
-                    {
-                        <b>@loanPaymentError</b>
-                    }
-
-                    @if (!playerDontPayLoan && !playerDontPayLoadConfirmation)
-                    {
-                        <button class="btn btn-primary" @onclick=@DontPayLoan>I don't want to pay my loan</button>
-                    }
-                    else if (playerDontPayLoan)
-                    {
-                        <b>If you don't pay your loan, you will be penalized. This can not be undone</b>
-                        <button class="btn btn-primary" @onclick=@DontPayLoanConfirmation>I REALLY don't want to pay my loan</button>
-                    }
-                    else if (playerDontPayLoadConfirmation && !playerDontPayLoan)
-                    {
-                        <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
-                            Who needs to press 'Start a new year!!!':
-                            @foreach (player player in playerList)
-                            {
-                                @if (player.StartNewYear == false && player.Ready != false)
-                                {
-                                    <b> || @player.Name || </b>
-                                }
-                            }
-                        </p>
+                        <b> || @player.Name || </b>
                     }
                 }
-                else if (playerDontPayLoadConfirmation || playerLoan.PaidThisYear)
+            </p>
+        }
+        else if (playerLoan.PaidThisYear)
+        {
+            <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+                Who needs to press 'Start a new year!!!':
+                @foreach (player player in playerList)
                 {
-                    <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
-                        Who needs to press 'Start a new year!!!':
-                        @foreach (player player in playerList)
-                        {
-                            @if (player.StartNewYear == false && player.Ready != false)
-                            {
-                                <b> || @player.Name || </b>
-                            }
-                        }
-                    </p>
-                }
-                else if (playerLoan.PaidThisYear)
-                {
-                    <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
-                        Who needs to press 'Start a new year!!!':
-                        @foreach (player player in playerList)
-                        {
-                            @if (player.StartNewYear == false && player.Ready != false)
-                            {
-                                <b> || @player.Name || </b>
-                            }
-                        }
-                    </p>
-                }
-            }
-            else if (currentPlayer.HasLoan && playerLoan.YearsRemaining < 11 && playerLoan.PaidThisYear)
-            {
-                <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
-                    Who needs to press 'Start a new year!!!':
-                    @foreach (player player in playerList)
+                    @if (player.StartNewYear == false && player.Ready != false)
                     {
-                        @if (player.StartNewYear == false && player.Ready != false)
-                        {
-                            <b> || @player.Name || </b>
-                        }
+                        <b> || @player.Name || </b>
                     }
-                </p>
+                }
+            </p>
+        }
+    }
+    else if (currentPlayer.HasLoan && playerLoan.YearsRemaining < 11 && playerLoan.PaidThisYear)
+    {
+        <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+            Who needs to press 'Start a new year!!!':
+            @foreach (player player in playerList)
+            {
+                @if (player.StartNewYear == false && player.Ready != false)
+                {
+                    <b> || @player.Name || </b>
+                }
             }
+        </p>
+    }
 
 
-        </div>
+
+</div>
     }
 
     <p>Special events!!!</p>
@@ -426,11 +440,13 @@ else
 
                 @foreach (Loan loan in allLoans)
                 {
-                    <tr>
-                        <td>@loan.PlayerName</td>
-                        <td>$@loan.LoanBalance</td>
-                    </tr>
-
+                    if (loan.LoanBalance > 0)
+                    {
+                        <tr>
+                            <td>@loan.PlayerName</td>
+                            <td>$@loan.LoanBalance</td>
+                        </tr>
+                    }
                 }
 
             </tbody>
