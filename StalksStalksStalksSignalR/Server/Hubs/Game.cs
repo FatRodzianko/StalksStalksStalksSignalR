@@ -32,6 +32,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             {
                 GameAlready = false;
                 EndTheGame = false;
+                EndTheGameCount = 0;
                 year = 0;
             }
             return base.OnDisconnectedAsync(exception);
@@ -45,6 +46,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         public static List<stalk> stalkList = new List<stalk>();
         public static List<player> playerList = new List<player>();
         public static List<StalksOwned> stalksOwned = new List<StalksOwned>();
+        public static List<Loan> AllLoans = new List<Loan>();
         
         public static List<string> stalksBankrupt = new List<string>();
         
@@ -53,7 +55,8 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         public PlayerBuy playerBuy = new PlayerBuy("", 0, 0, "");
         public static bool GameAlready = false;
         public static int year = 0;
-        public bool EndTheGame = false;
+        public static bool EndTheGame = false;
+        public int EndTheGameCount = 0;
 
         public async Task RequestYeehaw()
         {
@@ -71,7 +74,11 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         {
             //CreatePlayer(username, Context.ConnectionId);
             player RequestingPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
-            RequestingPlayer.Ready = true;
+            if (!GameAlready)
+            {
+                RequestingPlayer.Ready = true;
+            }
+            
             bool allPlayersReady = CheckIfPlayersReady();
             player currentPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
             await Clients.Caller.SendAsync("Readied User", JsonConvert.SerializeObject(playerList), allPlayersReady, JsonConvert.SerializeObject(currentPlayer));
@@ -96,7 +103,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
         { 
             player currentPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
             currentPlayer.EndGame = true;
-            bool EndTheGame = CheckEndGame();
+            EndTheGame = CheckEndGame();
             await Clients.All.SendAsync("Player Wants To Quit", JsonConvert.SerializeObject(playerList), EndTheGame);
         }
         public bool CheckEndGame()
@@ -152,6 +159,10 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             if (stalksBankrupt.Count > 0)
             {
                 stalksBankrupt.Clear();
+            }
+            if (AllLoans.Count > 0)
+            {
+                AllLoans.Clear();
             }
 
             //add the stalks
@@ -302,7 +313,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
         public void CreatePlayer(string playerName, string connectionid)
         {
-            playerList.Add(new player(playerName, connectionid, 10000, 0, false, false, false));
+            playerList.Add(new player(playerName, connectionid, 10000, 0, false, false, false, false));
             /*
             bool exists = playerList.Any(x => x.ConnectionId == connectionid);
             bool nameExists = playerList.Any(x => x.Name == playerName);
@@ -320,9 +331,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             */
 
         }
-
         
-
         public string BullBear()
         {
             var rng = new Random();
@@ -372,9 +381,13 @@ namespace StalksStalksStalksSignalR.Server.Hubs
             YearEvent thisYear = new YearEvent("", "", "", 0);
 
             bool isEveryoneReady = CheckReadyYear();
-            if (isEveryoneReady || EndTheGame)
+            if (isEveryoneReady || EndTheGame && EndTheGameCount < 0)
             {
                 //stalkList = JsonConvert.DeserializeAnonymousType(stalksListToJson, stalkList);
+                if (EndTheGame)
+                {
+                    EndTheGameCount++;
+                }
                 year++;
                 bullBear = BullBear();
                 adjustStalks(bullBear);
@@ -382,6 +395,11 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                 CheckBankruptcy();
                 splitStalks();
                 PayDividend(bullBear);
+                // add Loan adjustments for year end here
+                if (AllLoans.Count > 0)
+                {
+                    AdjustLoans();
+                }
                 GetNetWorth();
                 foreach (player otherplayer in playerList)
                 {
@@ -391,7 +409,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
 
             }
 
-            await Clients.All.SendAsync("New Year", year, bullBear, JsonConvert.SerializeObject(stalkList), JsonConvert.SerializeObject(stalksOwned), JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(thisYear), JsonConvert.SerializeObject(stalksBankrupt));
+            await Clients.All.SendAsync("New Year", year, bullBear, JsonConvert.SerializeObject(stalkList), JsonConvert.SerializeObject(stalksOwned), JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(thisYear), JsonConvert.SerializeObject(stalksBankrupt), JsonConvert.SerializeObject(AllLoans));
         }
 
         public bool CanBuy(int numberOfStalks, int stalkPrice, player currentPlayer)
@@ -465,7 +483,22 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                     }
                 }
                 netWorthValue += player.CashOnHand;
+                if (AllLoans.Count > 0)
+                {
+                    foreach (Loan loan in AllLoans)
+                    {
+                        if (loan.ConnectionId == player.ConnectionId)
+                        {
+                            netWorthValue -= loan.LoanBalance;
+                            Console.WriteLine("Lowered " + loan.PlayerName + "'s network due to loan by " + loan.LoanBalance.ToString());
+                        }
+                    }
+                }
                 player.NetWorth = netWorthValue;
+                /*if (player.NetWorth < 0)
+                {
+                    player.NetWorth = 0;
+                }*/
             }
         }
 
@@ -596,6 +629,214 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                     stalk.Split = false;
                 }
             }
+        }
+        public async Task GetLoanTerms()
+        {
+            player RequestingPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
+            int MaxLoanAmount = (int)(RequestingPlayer.NetWorth * 0.25);
+            int MinPayment = LoanMinimumPayment(MaxLoanAmount, 10);
+            await Clients.Caller.SendAsync("Loan Terms Sent", MaxLoanAmount, MinPayment);
+        }
+
+        public int LoanMinimumPayment(int LoanAmount, int YearsRemaining)
+        {
+            double firstHalf = Math.Pow(1.06, YearsRemaining);
+            firstHalf -= 1;
+            double secondHalf = Math.Pow(1.06, YearsRemaining);
+            secondHalf = secondHalf * 0.06;
+
+            double denominator = firstHalf / secondHalf;
+            Console.WriteLine("Calculating the minimum payment. Loanbalance: " + LoanAmount + " Years remaining: " + YearsRemaining);
+            int MinPayment = (int)(LoanAmount / denominator);
+            return MinPayment;
+        }
+        public async Task PurchaseLoan(string loanPurchase)
+        {
+            player RequestingPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
+            string purchaseError = null;
+            LoanPurchaseOrPayment playerPurchase = new LoanPurchaseOrPayment(null, null, null, 0);
+            playerPurchase = JsonConvert.DeserializeAnonymousType(loanPurchase, playerPurchase);
+            playerPurchase.DollarAmount = Math.Abs(playerPurchase.DollarAmount);
+
+            // Check if the player is allowed to make the pruchase
+            bool allowPurchase = true;
+            int MaxLoanAmount = (int)(RequestingPlayer.NetWorth * 0.25);
+            if (playerPurchase.DollarAmount > MaxLoanAmount)
+            {
+                allowPurchase = false;
+                purchaseError = "Requested loan exceeds maximum loan amount.";
+                Console.WriteLine(purchaseError);
+            }
+            else if (playerPurchase.DollarAmount < 100)
+            {
+                allowPurchase = false;
+                purchaseError = "The minimum loan you can purchase is $100.";
+                Console.WriteLine(purchaseError);
+            }
+
+            if (allowPurchase)
+            {
+                int MinPayment = LoanMinimumPayment(playerPurchase.DollarAmount, 10);
+                Loan newLoan = new Loan(RequestingPlayer.Name, RequestingPlayer.ConnectionId, playerPurchase.DollarAmount, MinPayment, 11, true, 0);
+                Loan newLoan2 = new Loan(RequestingPlayer.Name, RequestingPlayer.ConnectionId, playerPurchase.DollarAmount, MinPayment, 11, true, 0);
+                RequestingPlayer.HasLoan = true;
+                RequestingPlayer.CashOnHand += playerPurchase.DollarAmount;
+                Console.WriteLine(newLoan.PlayerName + "'s balance is " + newLoan.LoanBalance.ToString() + " after purchasing their first loan");
+                Console.WriteLine ("Adding new loan. Player: " + newLoan.PlayerName + " loan balance " + newLoan.LoanBalance.ToString() + " min payment " + newLoan.MinPayment.ToString());
+                Console.WriteLine("playerPurchase.DollarAmount = " + playerPurchase.DollarAmount.ToString());
+                AllLoans.Add(newLoan);
+            }
+
+            await Clients.Caller.SendAsync("Loan Purchased", purchaseError, JsonConvert.SerializeObject(playerList), JsonConvert.SerializeObject(AllLoans));
+        }
+        public void AdjustLoans()
+        {
+            foreach (Loan loan in AllLoans)
+            {
+                if (loan.YearsRemaining < 11)
+                {
+                    loan.YearsRemaining--;
+                    if (!loan.PaidThisYear)
+                    {
+                        loan.MissedPayments++;
+                        if (loan.MissedPayments == 1 && !EndTheGame)
+                        {
+                            Console.WriteLine(loan.PlayerName + "'s balance is " + loan.LoanBalance.ToString() + " before missed payment penalty 1");
+                            loan.LoanBalance = (int)(loan.LoanBalance * 1.10);
+                            Console.WriteLine(loan.PlayerName + "'s balance is " + loan.LoanBalance.ToString() + " after missed payment penalty 1");
+                        }
+                        else if (loan.MissedPayments == 2 && !EndTheGame)
+                        {
+                            Console.WriteLine(loan.PlayerName + "'s balance is " + loan.LoanBalance.ToString() + " before missed payment penalty 2");
+                            loan.LoanBalance = (int)(loan.LoanBalance * 1.15);
+                            Console.WriteLine(loan.PlayerName + "'s balance is " + loan.LoanBalance.ToString() + " after missed payment penalty 2");
+                        }
+                        else if (loan.MissedPayments >= 3 && !EndTheGame)
+                        {
+                            player BankruptPlayer = playerList.First(x => x.ConnectionId == loan.ConnectionId);
+                            stalksOwned.RemoveAll(x => x.PlayerName == loan.ConnectionId);
+                            BankruptPlayer.CashOnHand = 0;
+                            BankruptPlayer.NetWorth = 0;
+                            //BankruptPlayer.HasLoan = false;
+                            loan.LoanBalance = 0;
+                            loan.MinPayment = 0;
+                        }
+                        loan.MinPayment = LoanMinimumPayment(loan.LoanBalance, loan.YearsRemaining);
+                    }
+                    Console.WriteLine(loan.PlayerName + "'s balance is " + loan.LoanBalance.ToString() + " before interest");
+                    loan.LoanBalance = (int)(loan.LoanBalance * 1.06);
+                    Console.WriteLine(loan.PlayerName + "'s balance is " + loan.LoanBalance.ToString() + " after interest");
+                    //loan.MinPayment = LoanMinimumPayment(loan.LoanBalance, loan.YearsRemaining);
+                }
+                else if (loan.YearsRemaining == 11)
+                {
+                    Console.WriteLine(loan.PlayerName + "'s balance is " + loan.LoanBalance.ToString() + " before interest");
+                    loan.LoanBalance = (int)(loan.LoanBalance * 1.06);
+                    Console.WriteLine(loan.PlayerName + "'s balance is " + loan.LoanBalance.ToString() + " after interest");
+                    loan.YearsRemaining--;
+                }
+            }
+        }
+        public async Task PlayerDidntPayLoan(string playerLoanToJson)
+        {
+            Loan playerLoan = new Loan(null, null, 0, 0, 0, false, 0);
+            playerLoan = JsonConvert.DeserializeAnonymousType(playerLoanToJson, playerLoan);
+            foreach (Loan loan in AllLoans)
+            {
+                if (loan.ConnectionId == playerLoan.ConnectionId)
+                {
+                    loan.PaidThisYear = false;
+                }
+            }
+            await Clients.Caller.SendAsync("Didn't Pay Loan", JsonConvert.SerializeObject(AllLoans));
+        }
+        public async Task PayLoan(string playerLoanPaymentToJson)
+        {
+            Console.WriteLine("Initiating loan payment");
+            player RequestingPlayer = playerList.First(x => x.ConnectionId == Context.ConnectionId);
+            string paymentError = null;
+            LoanPurchaseOrPayment playerPayment = new LoanPurchaseOrPayment(null, null, null, 0);
+            playerPayment = JsonConvert.DeserializeAnonymousType(playerLoanPaymentToJson, playerPayment);
+            Loan playerLoan = AllLoans.First(x => x.ConnectionId == RequestingPlayer.ConnectionId);
+            playerPayment.DollarAmount = Math.Abs(playerPayment.DollarAmount);
+
+            foreach (player player in playerList)
+            {
+                if (player.ConnectionId == RequestingPlayer.ConnectionId)
+                {
+                    if ((playerPayment.DollarAmount >= playerLoan.MinPayment) && (playerPayment.DollarAmount <= player.CashOnHand))
+                    {
+                        foreach (Loan loan in AllLoans)
+                        {
+                            if (loan.ConnectionId == RequestingPlayer.ConnectionId)
+                            {
+                                loan.PaidThisYear = true;
+                                if (playerPayment.DollarAmount < loan.LoanBalance)
+                                {
+                                    Console.WriteLine(loan.PlayerName + " has a loan balance of " + loan.LoanBalance.ToString());
+                                    loan.LoanBalance -= playerPayment.DollarAmount;
+                                    player.CashOnHand -= playerPayment.DollarAmount;
+                                    // Calculate new minimum payment?
+                                    loan.MinPayment = LoanMinimumPayment(loan.LoanBalance, (loan.YearsRemaining - 1));
+                                }
+                                else if (playerPayment.DollarAmount == loan.LoanBalance)
+                                {
+                                    Console.WriteLine(loan.PlayerName + " has a loan balance of " + loan.LoanBalance.ToString());
+                                    loan.LoanBalance -= playerPayment.DollarAmount;
+                                    player.CashOnHand -= playerPayment.DollarAmount;
+                                    loan.LoanBalance = 0;
+                                    loan.MinPayment = 0;
+                                    //AllLoans.RemoveAll(x => x.ConnectionId == player.ConnectionId);
+                                    //player.HasLoan = false;
+                                }
+                                else if (playerPayment.DollarAmount > loan.LoanBalance)
+                                {
+                                    player.CashOnHand -= loan.LoanBalance;
+                                    loan.LoanBalance = 0;
+                                    loan.MinPayment = 0;
+                                    //AllLoans.RemoveAll(x => x.ConnectionId == player.ConnectionId);
+                                    //player.HasLoan = false;
+                                }
+
+                                Console.WriteLine("Calculating new minimum payment. Loan balance: " + loan.LoanBalance + " Years remaining: " + (loan.YearsRemaining - 1).ToString() + " New miniumum: " + loan.MinPayment);
+                                Console.WriteLine(loan.PlayerName + " paid " + playerPayment.DollarAmount.ToString() + " toward their loan. New balance is " + loan.LoanBalance.ToString());
+                            }
+                        }
+                        //playerLoan.PaidThisYear = true;
+                        //playerLoan.LoanBalance -= playerPayment.DollarAmount;
+
+                    }
+                    else if (playerPayment.DollarAmount < playerLoan.MinPayment)
+                    {
+                        paymentError = "Payment is below the minimum payment.";
+                        foreach (Loan loan in AllLoans)
+                        {
+                            if (loan.ConnectionId == RequestingPlayer.ConnectionId)
+                            {
+                                loan.PaidThisYear = false;
+                            }
+                        }
+                        Console.WriteLine("Payment is below the minimum payment " + playerPayment.DollarAmount);
+                    }
+                    else if (playerPayment.DollarAmount > player.CashOnHand)
+                    {
+                        paymentError = "You do not have enough money to pay that amount";
+                        foreach (Loan loan in AllLoans)
+                        {
+                            if (loan.ConnectionId == RequestingPlayer.ConnectionId)
+                            {
+                                loan.PaidThisYear = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            
+            Console.WriteLine("Loan payment complete");
+
+            await Clients.Caller.SendAsync("Loan Paid", paymentError, JsonConvert.SerializeObject(AllLoans), JsonConvert.SerializeObject(playerList));
         }
     }
 

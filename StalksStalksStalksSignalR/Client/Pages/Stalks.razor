@@ -16,10 +16,10 @@
     <p></p>
     @if (currentPlayer.Name == "")
     {
-    <EditForm Model=@currentPlayer OnSubmit=@CreatePlayerName>
-        <InputText @bind-Value="username" />
-        <input type="submit" value="Create User Name" class="btn btn-primary" />
-    </EditForm>
+        <EditForm Model=@currentPlayer OnSubmit=@CreatePlayerName>
+            <InputText @bind-Value="username" />
+            <input type="submit" value="Create User Name" class="btn btn-primary" />
+        </EditForm>
     }
     @if (currentPlayer.Name != "")
     {
@@ -113,14 +113,123 @@ else
     else
     {
         <div style="clear:both">
-            <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> Who needs to press 'Start a new year!!!':
-            @foreach (player player in playerList)
+            @if (!currentPlayer.HasLoan)
             {
-                @if (player.StartNewYear == false && player.Ready != false)
+                <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+                    Who needs to press 'Start a new year!!!':
+                    @foreach (player player in playerList)
+                    {
+                        @if (player.StartNewYear == false && player.Ready != false)
+                        {
+                            <b> || @player.Name || </b>
+                        }
+                    }
+                </p>
+            }
+            else if (currentPlayer.HasLoan && playerLoan.YearsRemaining == 11)
+            {
+                <b>You have a loan. You will need to start paying it off next year.</b><br />
+                <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+                    Who needs to press 'Start a new year!!!':
+                    @foreach (player player in playerList)
+                    {
+                        @if (player.StartNewYear == false && player.Ready != false)
+                        {
+                            <b> || @player.Name || </b>
+                        }
+                    }
+                </p>
+            }
+            else if (currentPlayer.HasLoan && playerLoan.YearsRemaining < 11 && !playerLoan.PaidThisYear)
+            {
+                @if (!playerDontPayLoan || !playerDontPayLoadConfirmation)
                 {
-                    <b> || @player.Name || </b>
+                    <b>You're loan balance is: @playerLoan.LoanBalance</b><br />
+                    <b>You're minimum loan payment is: @playerLoan.MinPayment</b><br />
+                    <b>Years remaining on the loan: @playerLoan.YearsRemaining</b><br />
+                    @if (playerLoan.MissedPayments == 1)
+                    {
+                        <b>You've missed one payment.</b>
+                    }
+                    else if (playerLoan.MissedPayments == 2)
+                    {
+                        <b>You've missed two payments. One more missed payment and the bank will sieze all your assets.</b>
+                    }
+                    <EditForm Model=@loanPurchaseOrPayment OnSubmit=@PayLoan>
+                        <InputText type="hidden" @bind-Value="loanPurchaseOrPayment.PurchaseOrPayment">Payment</InputText>
+                        <InputNumber @bind-Value="loanPurchaseOrPayment.DollarAmount">0</InputNumber>
+                        <input type="submit" value="Submit" class="btn btn-primary" />
+                    </EditForm>
+                    @if (!String.IsNullOrEmpty(loanPaymentError))
+                    {
+                        <b>@loanPaymentError</b>
+                    }
+
+                    @if (!playerDontPayLoan && !playerDontPayLoadConfirmation)
+                    {
+                        <button class="btn btn-primary" @onclick=@DontPayLoan>I don't want to pay my loan</button>
+                    }
+                    else if (playerDontPayLoan)
+                    {
+                        <b>If you don't pay your loan, you will be penalized. This can not be undone</b>
+                        <button class="btn btn-primary" @onclick=@DontPayLoanConfirmation>I REALLY don't want to pay my loan</button>
+                    }
+                    else if (playerDontPayLoadConfirmation && !playerDontPayLoan)
+                    {
+                        <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+                            Who needs to press 'Start a new year!!!':
+                            @foreach (player player in playerList)
+                            {
+                                @if (player.StartNewYear == false && player.Ready != false)
+                                {
+                                    <b> || @player.Name || </b>
+                                }
+                            }
+                        </p>
+                    }
+                }
+                else if (playerDontPayLoadConfirmation || playerLoan.PaidThisYear)
+                {
+                    <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+                        Who needs to press 'Start a new year!!!':
+                        @foreach (player player in playerList)
+                        {
+                            @if (player.StartNewYear == false && player.Ready != false)
+                            {
+                                <b> || @player.Name || </b>
+                            }
+                        }
+                    </p>
+                }
+                else if (playerLoan.PaidThisYear)
+                {
+                    <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+                        Who needs to press 'Start a new year!!!':
+                        @foreach (player player in playerList)
+                        {
+                            @if (player.StartNewYear == false && player.Ready != false)
+                            {
+                                <b> || @player.Name || </b>
+                            }
+                        }
+                    </p>
                 }
             }
+            else if (currentPlayer.HasLoan && playerLoan.YearsRemaining < 11 && playerLoan.PaidThisYear)
+            {
+                <button class="btn btn-primary" @onclick="StartNewYear">Start a new year</button> <p>
+                    Who needs to press 'Start a new year!!!':
+                    @foreach (player player in playerList)
+                    {
+                        @if (player.StartNewYear == false && player.Ready != false)
+                        {
+                            <b> || @player.Name || </b>
+                        }
+                    }
+                </p>
+            }
+
+
         </div>
     }
 
@@ -245,6 +354,40 @@ else
 
         </tbody>
     </table>
+    <table style="width:100%" border="0">
+        <tr>
+            @if ((!doYouWantToKnowAboutLoans) && year > 1 && (!playerWantsToTakeOutALoan) && !currentPlayer.HasLoan)
+            {
+                <td style="width:100%;text-align:left"><button class="btn btn-primary" @onclick=@LearnAboutLoans>Would you like to learn about our loans?</button></td>
+            }
+            else if (doYouWantToKnowAboutLoans && !currentPlayer.HasLoan)
+            {
+                <td>You can take out a loan up 25% of your net worth. The minimum loan is $100. Terms are 10 years and 6% interest. If you take out a loan this year, your first payment is NEXT year. Penalties for missed payments: 1st missed payment - 10% added to loan balance. 2nd - 15% added. 3rd - All assets siezed and you are bankrupt</td>
+                <td><b>The max loan you can take out is: <u>@MaxLoanAmount</u></b></td>
+                <td><b>The minimum payment for the loan would be: <u>@MinLoanPayment</u></b></td>
+                <td><button class="btn btn-primary" @onclick=@PlayerWantsLoan>take out a loan?</button></td>
+
+            }
+            else if (playerWantsToTakeOutALoan && !currentPlayer.HasLoan)
+            {
+                <td><b>The max loan you can take out is: <u>@MaxLoanAmount</u></b></td>
+                <td>
+                    <EditForm Model=@loanPurchaseOrPayment OnSubmit=@PurchaseLoan>
+                        <InputText type="hidden" @bind-Value="loanPurchaseOrPayment.PurchaseOrPayment">Purchase</InputText>
+                        <InputNumber @bind-Value="loanPurchaseOrPayment.DollarAmount">0</InputNumber>
+                        <input type="submit" value="Submit" class="btn btn-primary" />
+                    </EditForm>
+                </td>
+                @if (!String.IsNullOrEmpty(purchaseError))
+                {
+                    <td>@purchaseError</td>
+                }
+            }
+
+        </tr>
+
+    </table>
+
 
     <p>Scoreboard baby!</p>
     <table class="table">
@@ -269,6 +412,31 @@ else
 
         </tbody>
     </table>
+    if (endGame && allLoans.Count > 0)
+    {
+        <p>Outstanding loans</p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Player Name</th>
+                    <th>Remaining Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (Loan loan in allLoans)
+                {
+                    <tr>
+                        <td>@loan.PlayerName</td>
+                        <td>$@loan.LoanBalance</td>
+                    </tr>
+
+                }
+
+            </tbody>
+        </table>
+
+    }
 
 
     if (!endGame)
@@ -306,7 +474,7 @@ Sounds from Zapsplat.com
 
     public string stalksListToJson;
 
-    public player currentPlayer = new player("", "", 10000, 0, false, false, false);
+    public player currentPlayer = new player("", "", 10000, 0, false, false, false, false);
     public string username = "";
     public List<player> playerList = new List<player>();
     public bool allPlayersReady = false;
@@ -315,7 +483,9 @@ Sounds from Zapsplat.com
     public List<StalksOwned> stalksOwned = new List<StalksOwned>();
     public List<StalksOwned> allStalksOwned = new List<StalksOwned>();
 
+
     PlayerBuy playerBuy = new PlayerBuy("", 0, 0, "");
+    LoanPurchaseOrPayment loanPurchaseOrPayment = new LoanPurchaseOrPayment(null, null, null, 0);
 
     public string playerConnectionId;
     public bool gotConnectionId = false;
@@ -325,7 +495,7 @@ Sounds from Zapsplat.com
     public bool startNewYear = false;
     public bool endGame = false;
     public string winner = "";
-    player winningPlayer = new player("It'sa me-a Mario", "", 10000, 0, false, false, false);
+    player winningPlayer = new player("It'sa me-a Mario", "", 10000, 0, false, false, false, false);
 
     YearEvent thisYear = new YearEvent("", "", "Welcome to StalksStalksStalks! You have been tasked with making MegaCorp as much money as possible! Don't worry, other people are competing with you as well! The investor with the highest networth wins! Everyone else is fired! Start the new year to begin the game!", 0);
 
@@ -334,6 +504,18 @@ Sounds from Zapsplat.com
     public string givingYeehaw = "";
     public bool YeehawReceived = false;
     public List<string> stalksBankrupt = new List<string>();
+    public bool doYouWantToKnowAboutLoans = false;
+    public bool playerWantsToTakeOutALoan = false;
+    public int loanAmount = 0;
+    public Loan playerLoan = new Loan(null, null, 0, 0, 0, false, 0);
+    public List<Loan> allLoans = new List<Loan>();
+    public int MaxLoanAmount;
+    public int MinLoanPayment;
+    public string purchaseError = null;
+    public string loanPaymentError = null;
+
+    public bool playerDontPayLoan = false;
+    public bool playerDontPayLoadConfirmation = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -391,8 +573,13 @@ Sounds from Zapsplat.com
 
         });
 
-        hubConnection.On<int, string, string, string, string, string, string>("New Year", (newYear, newBearBull, stalksListToJson, StalksOwnedToJson, playerListToJson, thisYearEventToJson, stalksBankruptToJson) =>
+        hubConnection.On<int, string, string, string, string, string, string, string>("New Year", (newYear, newBearBull, stalksListToJson, StalksOwnedToJson, playerListToJson, thisYearEventToJson, stalksBankruptToJson, loanListToJson) =>
         {
+            bool hasYearIncreased = false;
+            if (year < newYear)
+            {
+                hasYearIncreased = true;
+            }
             year = newYear;
             bullBear = newBearBull;
             stalkList = JsonConvert.DeserializeAnonymousType(stalksListToJson, stalkList);
@@ -413,6 +600,20 @@ Sounds from Zapsplat.com
             }
 
             stalksBankrupt = JsonConvert.DeserializeAnonymousType(stalksBankruptToJson, stalksBankrupt);
+
+            allLoans = JsonConvert.DeserializeAnonymousType(loanListToJson, allLoans);
+            if (allLoans.Any(x => x.ConnectionId == playerConnectionId))
+            {
+
+                playerLoan = allLoans.First(x => x.ConnectionId == playerConnectionId);
+                if (hasYearIncreased)
+                {
+                    playerLoan.PaidThisYear = false;
+                    playerDontPayLoan = false;
+                    playerDontPayLoadConfirmation = false;
+                }
+
+            }
 
             if (endGame)
             {
@@ -469,6 +670,49 @@ Sounds from Zapsplat.com
             StateHasChanged();
 
         });
+        hubConnection.On<int, int>("Loan Terms Sent", (MaxLoanAmountFromServer, MinPaymentFromServer) =>
+        {
+            MaxLoanAmount = MaxLoanAmountFromServer;
+            MinLoanPayment = MinPaymentFromServer;
+            StateHasChanged();
+
+        });
+        hubConnection.On<string, string, string>("Loan Purchased", (purchaseErrorFromServer, playerListToJson, loanListToJson) =>
+        {
+
+            purchaseError = purchaseErrorFromServer;
+            if (String.IsNullOrEmpty(purchaseError))
+            {
+                doYouWantToKnowAboutLoans = false;
+                playerWantsToTakeOutALoan = false;
+            }
+
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = playerList.First(x => x.ConnectionId == playerConnectionId);
+
+            allLoans = JsonConvert.DeserializeAnonymousType(loanListToJson, allLoans);
+            playerLoan = allLoans.First(x => x.ConnectionId == playerConnectionId);
+
+            StateHasChanged();
+        });
+        hubConnection.On<string>("Didn't Pay Loan", (loanListToJson) =>
+        {
+            allLoans = JsonConvert.DeserializeAnonymousType(loanListToJson, allLoans);
+            playerLoan = allLoans.First(x => x.ConnectionId == playerConnectionId);
+
+            StateHasChanged();
+        });
+        hubConnection.On<string, string, string>("Loan Paid", (paymentErrorFromServer, loanListToJson, playerListToJson) =>
+        {
+            loanPaymentError = paymentErrorFromServer;
+
+            playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
+            currentPlayer = playerList.First(x => x.ConnectionId == playerConnectionId);
+            allLoans = JsonConvert.DeserializeAnonymousType(loanListToJson, allLoans);
+            playerLoan = allLoans.First(x => x.ConnectionId == playerConnectionId);
+
+            StateHasChanged();
+        });
 
 
         await hubConnection.StartAsync();
@@ -478,6 +722,27 @@ Sounds from Zapsplat.com
     {
         //stalksListToJson = JsonConvert.SerializeObject(stalkList);
         NewYear();
+    }
+    public void LearnAboutLoans()
+    {
+        doYouWantToKnowAboutLoans = true;
+        GetLoanTerms();
+    }
+    public void PlayerWantsLoan()
+    {
+        doYouWantToKnowAboutLoans = false;
+        playerWantsToTakeOutALoan = true;
+    }
+    public void DontPayLoan()
+    {
+        playerDontPayLoan = true;
+    }
+    public void DontPayLoanConfirmation()
+    {
+        //playerDontPayLoan = false;
+        playerDontPayLoadConfirmation = true;
+        playerLoan.PaidThisYear = false;
+        PlayerDidntPayLoan();
     }
 
 
@@ -499,6 +764,14 @@ Sounds from Zapsplat.com
         hubConnection.SendAsync("GiveYeehaw");
     Task CreatePlayerName() =>
         hubConnection.SendAsync("CreatePlayerName", username);
+    Task GetLoanTerms() =>
+        hubConnection.SendAsync("GetLoanTerms");
+    Task PurchaseLoan() =>
+        hubConnection.SendAsync("PurchaseLoan", JsonConvert.SerializeObject(loanPurchaseOrPayment));
+    Task PlayerDidntPayLoan() =>
+        hubConnection.SendAsync("PlayerDidntPayLoan", JsonConvert.SerializeObject(playerLoan));
+    Task PayLoan() =>
+        hubConnection.SendAsync("PayLoan", JsonConvert.SerializeObject(loanPurchaseOrPayment));
 
     public bool IsConnected =>
 hubConnection.State == HubConnectionState.Connected;

@@ -13,8 +13,9 @@ namespace StalksStalksStalksSignalR.Shared
         public bool Ready { get; set; }
         public bool StartNewYear { get; set; }
         public bool EndGame { get; set; }
+        public bool HasLoan { get; set; }
 
-        public player(string name, string connectionid, int cashonhand, int networth, bool ready, bool startnewyear, bool endgame)
+        public player(string name, string connectionid, int cashonhand, int networth, bool ready, bool startnewyear, bool endgame, bool hasloan)
         {
             Name = name;
             ConnectionId = connectionid;
@@ -23,6 +24,7 @@ namespace StalksStalksStalksSignalR.Shared
             Ready = ready;
             StartNewYear = startnewyear;
             EndGame = endgame;
+            HasLoan = hasloan;
         }
 
 
