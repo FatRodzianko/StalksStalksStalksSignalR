@@ -550,13 +550,13 @@ Sounds from Zapsplat.com
             playerList = JsonConvert.DeserializeAnonymousType(playerListToJson, playerList);
             allPlayersReady = arePlayersReady;
 
-        /*
-        if (!gotConnectionId && username != "")
-        {
-            currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerInfo, currentPlayer);
-            playerConnectionId = currentPlayer.ConnectionId;
-            gotConnectionId = true;
-        }*/
+            /*
+            if (!gotConnectionId && username != "")
+            {
+                currentPlayer = JsonConvert.DeserializeAnonymousType(currentPlayerInfo, currentPlayer);
+                playerConnectionId = currentPlayer.ConnectionId;
+                gotConnectionId = true;
+            }*/
 
             StateHasChanged();
         });
@@ -595,8 +595,11 @@ Sounds from Zapsplat.com
             if (year < newYear)
             {
                 hasYearIncreased = true;
+                doYouWantToKnowAboutLoans = false;
+                playerWantsToTakeOutALoan = false;
+                year = newYear;
             }
-            year = newYear;
+
             bullBear = newBearBull;
             stalkList = JsonConvert.DeserializeAnonymousType(stalksListToJson, stalkList);
 
@@ -618,7 +621,7 @@ Sounds from Zapsplat.com
             stalksBankrupt = JsonConvert.DeserializeAnonymousType(stalksBankruptToJson, stalksBankrupt);
 
             allLoans = JsonConvert.DeserializeAnonymousType(loanListToJson, allLoans);
-            if (allLoans.Any(x => x.ConnectionId == playerConnectionId))
+            if (allLoans.Any(x => x.ConnectionId == playerConnectionId) && hasYearIncreased)
             {
 
                 playerLoan = allLoans.First(x => x.ConnectionId == playerConnectionId);
