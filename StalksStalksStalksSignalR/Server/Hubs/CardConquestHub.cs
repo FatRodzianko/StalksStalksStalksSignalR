@@ -389,6 +389,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                             Console.WriteLine("Discarding played card");
                             player.DiscardPile.Add(army.PlayerCard);
                             player.Hand.RemoveAll(x => x.CardName == army.PlayerCard.CardName);
+                            army.PlayerCard = null;
                             if (player.Hand.Count == 0)
                             {
                                 Console.WriteLine("Hand depleted. Resetting the player's hand");
@@ -466,7 +467,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                 playerGame.WinningPlayer = null;
                 // Increase the round number
 
-                if (playerGame.RoundNumber == 10)
+                if (playerGame.RoundNumber >= 10)
                 {
                     isGameOver = true;
                     isLastRound = false;
@@ -477,7 +478,7 @@ namespace StalksStalksStalksSignalR.Server.Hubs
                 }
                 // Increase the round number
                 playerGame.RoundNumber++;
-                // reset the phase to Card Selection
+                // reset the phase to Unit Selection
                 playerGame.Phase = "Unit Selection";
                 // reset player status
                 foreach (CCPlayer player in playerGame.Room.Players)

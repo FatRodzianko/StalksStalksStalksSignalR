@@ -413,6 +413,7 @@ else if (isGameOver)
     public string cardError;
     public int opponentAvailableTanks;
     public int opponentAvailableInf;
+    public int opponentPowerWithoutCard;
     public int currentPlayerUnitPower;
     public int opponentUnitPower;
     public bool isGameOver = false;
@@ -500,7 +501,8 @@ else if (isGameOver)
             opponentPlayer = playerGame.Room.Players.First(x => x.PlayerName != currentPlayer.PlayerName);
             opponentArmy = playerGame.Armies.First(x => x.PlayerName == opponentPlayer.PlayerName);
             currentPlayerUnitPower = (currentPlayerArmy.Tanks * 2) + currentPlayerArmy.Infantry + currentPlayerArmy.PlayerCard.Power;
-            opponentUnitPower = (opponentArmy.Tanks * 2) + opponentArmy.Infantry + opponentArmy.PlayerCard.Power;
+            if(gamePhase == "Battle Resolution")
+                opponentUnitPower = (opponentArmy.Tanks * 2) + opponentArmy.Infantry + opponentArmy.PlayerCard.Power;
             StateHasChanged();
         });
         hubConnection.On<string, bool, bool, string>("Battle Completed", (playerGameToJson, isGameOverFromGroup, isLastRoundFromGroup, noUnitsErrorFromGroup) =>
